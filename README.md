@@ -22,6 +22,10 @@ Add the service provider in `app/config/app.php`:
 
     'Jenssegers\Raven\RavenServiceProvider',
 
+Optional: register the Raven alias:
+
+    'Raven'           => 'Jenssegers\Raven\Facades\Raven',
+
 Configuration
 -------------
 

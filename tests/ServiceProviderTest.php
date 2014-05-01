@@ -24,6 +24,12 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->assertInstanceOf('Raven_Client', $raven);
     }
 
+    public function testFacade()
+    {
+        $raven = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
+        $this->assertInstanceOf('Raven_Client', $raven);
+    }
+
     public function testPassConfiguration()
     {
         Config::set('raven::dsn', 'https://foo:bar@app.getsentry.com/12345');
