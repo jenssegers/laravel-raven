@@ -3,7 +3,7 @@ Laravel Raven
 
 [![Build Status](https://travis-ci.org/jenssegers/Laravel-Raven.svg)](https://travis-ci.org/jenssegers/Laravel-Raven) [![Coverage Status](https://coveralls.io/repos/jenssegers/Laravel-Raven/badge.png)](https://coveralls.io/r/jenssegers/Laravel-Raven)
 
-Sentry/Raven error monitoring integration for Laravel projects.
+Sentry (Raven) error monitoring integration for Laravel projects.
 
 ![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
 

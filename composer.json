@@ -1,6 +1,6 @@
 {
     "name": "jenssegers/raven",
-    "description": "Sentry/Raven error monitoring integration for Laravel projects",
+    "description": "Sentry (Raven) error monitoring integration for Laravel projects",
     "keywords": ["laravel", "sentry", "getsentry", "raven", "monitoring", "error", "logging"],
     "license": "MIT",
     "authors": [
