@@ -40,7 +40,7 @@ And change your Sentry DSN:
 Usage
 -----
 
-This library adds a listener to Laravel's logging system. To monitor exceptions, just use the `Log` facade:
+This library adds a listener to Laravel's logging system. To monitor exceptions, simply use the `Log` facade:
 
     App::error(function(Exception $exception, $code)
     {
