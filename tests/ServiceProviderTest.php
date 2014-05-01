@@ -22,8 +22,6 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     {
         $raven = App::make('raven');
         $this->assertInstanceOf('Raven_Client', $raven);
-
-        Log::info('test');
     }
 
     public function testPassConfiguration()
