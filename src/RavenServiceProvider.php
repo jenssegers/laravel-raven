@@ -49,20 +49,9 @@ class RavenServiceProvider extends ServiceProvider {
      */
     protected function registerListeners()
     {
-        // Register error listener
-        $this->app->error(function(Exception $exception)
-        {
-            if ( ! in_array(App::environment(), Config::get('raven::environments'))) return;
-
-            $raven = App::make('raven');
-            $raven->captureException($exception);
-        });
-
         // Register log listener
         $this->app->log->listen(function($level, $message, $context)
         {
-            if ( ! in_array(App::environment(), Config::get('raven::environments'))) return;
-
             $raven = App::make('raven');
 
             if ($message instanceof Exception)

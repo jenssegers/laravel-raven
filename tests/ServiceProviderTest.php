@@ -5,7 +5,6 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     public function setUp()
     {
         parent::setUp();
-        Config::set('raven::environments', array('testing'));
     }
 
     public function tearDown()
@@ -48,18 +47,6 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals(spl_object_hash($raven1), spl_object_hash($raven2));
     }
 
-    public function testRegisterErrorListener()
-    {
-        $exception = new Exception('Testing error handler');
-
-        $mock = Mockery::mock('Raven_Client');
-        $mock->shouldReceive('captureException')->once()->with($exception);
-        $this->app->instance('raven', $mock);
-
-        $handler = $this->app->exception;
-        $response = (string) $handler->handleException($exception);
-    }
-
     public function testRegisterLogListener()
     {
         $exception = new Exception('Testing error handler');
@@ -73,49 +60,6 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         Log::info('hello');
         Log::error('oops', array('context'));
         Log::error($exception);
-    }
-
-    public function testEnvironments()
-    {
-        Config::set('raven::environments', array('production', 'local', 'staging'));
-        $this->app['env'] = 'local';
-
-        $mock = Mockery::mock('Raven_Client');
-        $mock->shouldReceive('captureMessage')->times(1);
-        $mock->shouldReceive('captureException')->times(1);
-        $this->app->instance('raven', $mock);
-
-        $handler = $this->app->exception;
-        $handler->handleException(new Exception('Testing error handler'));
-        Log::info('hello');
-
-        // ------
-
-        Config::set('raven::environments', array('production', 'local', 'staging'));
-        $this->app['env'] = 'testing';
-
-        $mock = Mockery::mock('Raven_Client');
-        $mock->shouldReceive('captureMessage')->times(0);
-        $mock->shouldReceive('captureException')->times(0);
-        $this->app->instance('raven', $mock);
-
-        $handler = $this->app->exception;
-        $handler->handleException(new Exception('Testing error handler'));
-        Log::info('hello');
-
-        // ------
-
-        Config::set('raven::environments', array());
-        $this->app['env'] = 'testing';
-
-        $mock = Mockery::mock('Raven_Client');
-        $mock->shouldReceive('captureMessage')->times(0);
-        $mock->shouldReceive('captureException')->times(0);
-        $this->app->instance('raven', $mock);
-
-        $handler = $this->app->exception;
-        $handler->handleException(new Exception('Testing error handler'));
-        Log::info('hello');
     }
 
 }

@@ -40,14 +40,13 @@ And change your Sentry DSN:
 Usage
 -----
 
-The service provider will make sure all your exceptions and log messages are passed to Sentry automatically.
+This library adds a listener to Laravel's logging system. To monitor exceptions, just use the `Log` facade:
 
-    throw new Exception('Something went wrong');
+    App::error(function(Exception $exception, $code)
+    {
+        Log::error($exception);
+    });
 
-Or if you want to directly send the exception object:
+Your other log messages will also be sent to Sentry:
 
-    Log::error(new Exception('Something went wrong'));
-
-Your log messages will also be sent to Sentry:
-
-    Log::info('Hello Sentry', array('context'));
+    Log::info('Here is some debug information', array('context'));
