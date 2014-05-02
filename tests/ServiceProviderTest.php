@@ -15,12 +15,14 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     public function testBinding()
     {
         $raven = App::make('raven');
+        $this->assertInstanceOf('Jenssegers\Raven\Raven', $raven);
         $this->assertInstanceOf('Raven_Client', $raven);
     }
 
     public function testFacade()
     {
         $raven = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
+        $this->assertInstanceOf('Jenssegers\Raven\Raven', $raven);
         $this->assertInstanceOf('Raven_Client', $raven);
     }
 
@@ -82,7 +84,7 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     {
         $exception = new Exception('Testing error handler');
 
-        $mock = Mockery::mock('Raven_Client');
+        $mock = Mockery::mock('Jenssegers\Raven\Raven');
         $mock->shouldReceive('captureMessage')->once()->with('hello', array(), array('level' => 'info', 'extra' => array()));
         $mock->shouldReceive('captureMessage')->once()->with('oops', array(), array('level' => 'error', 'extra' => array('context')));
         $mock->shouldReceive('captureException')->once()->with($exception, array('level' => 'error', 'extra' => array()));
@@ -91,6 +93,25 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         Log::info('hello');
         Log::error('oops', array('context'));
         Log::error($exception);
+    }
+
+    public function testQueueGetsPushed()
+    {
+        $mock = Mockery::mock('Jenssegers\Raven\Raven[sendFromJob]');
+        $mock->shouldReceive('sendFromJob')->times(0);
+        $this->app->instance('raven', $mock);
+
+        Queue::shouldReceive('push')->once();
+        Log::info('hello');
+    }
+
+    public function testQueueGetsFired()
+    {
+        $mock = Mockery::mock('Jenssegers\Raven\Raven[sendFromJob]');
+        $mock->shouldReceive('sendFromJob')->times(1);
+        $this->app->instance('raven', $mock);
+
+        Log::info('hello');
     }
 
 }

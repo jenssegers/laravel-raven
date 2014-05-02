@@ -2,6 +2,7 @@
 
 use App;
 use Session;
+use Queue;
 use Request;
 use Raven_Client;
 
@@ -35,6 +36,26 @@ class Raven extends Raven_Client {
         $this->tags['ip'] = Request::getClientIp();
 
         return parent::get_default_data();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function send($data)
+    {
+        // Push the job to the queue instead of sending it to Sentry directly.
+        Queue::push('Jenssegers\Raven\Job', $data);
+    }
+
+    /**
+     * Send data from the queue job.
+     *
+     * @param  array $data
+     * @return void
+     */
+    public function sendFromJob($data)
+    {
+        return parent::send($data);
     }
 
 }

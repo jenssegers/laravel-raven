@@ -3,7 +3,7 @@ Laravel Raven
 
 [![Build Status](https://travis-ci.org/jenssegers/Laravel-Raven.svg)](https://travis-ci.org/jenssegers/Laravel-Raven) [![Coverage Status](https://coveralls.io/repos/jenssegers/Laravel-Raven/badge.png)](https://coveralls.io/r/jenssegers/Laravel-Raven)
 
-Sentry (Raven) error monitoring integration for Laravel projects.
+Sentry (Raven) error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Sentry messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application.
 
 ![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
 
@@ -37,10 +37,14 @@ And change your Sentry DSN:
 
     'dsn' => '',
 
+Because this library uses the queue system, make sure your `config/queue.php` file is configured correctly. If you do not wish to process the jobs in the background, you can set the queue driver to 'sync':
+
+    'default' => 'sync',
+
 Usage
 -----
 
-This library adds a listener to Laravel's logging system. To monitor exceptions, simply use the `Log` facade:
+To monitor exceptions, simply use the `Log` facade:
 
     App::error(function(Exception $exception, $code)
     {
