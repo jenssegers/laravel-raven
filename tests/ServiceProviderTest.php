@@ -47,6 +47,15 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals(array('php_version' => phpversion()), $raven->tags);
     }
 
+    public function testAdditionalTags()
+    {
+        $raven = App::make('raven');
+        $data = $raven->get_default_data();
+
+        $this->assertEquals('testing', $data['tags']['environment']);
+        $this->assertEquals('127.0.0.1', $data['tags']['ip']);
+    }
+
     public function testIsSingleton()
     {
         $raven1 = App::make('raven');

@@ -41,7 +41,7 @@ class RavenServiceProvider extends ServiceProvider {
             // Get the Raven config
             $config = array_except(Config::get('raven::config'), array('dsn'));
 
-            return new Raven_Client(Config::get('raven::dsn'), $config);
+            return new Raven(Config::get('raven::dsn'), $config);
         });
     }
 
