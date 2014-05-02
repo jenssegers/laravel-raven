@@ -66,6 +66,13 @@ class RavenServiceProvider extends ServiceProvider {
                 $raven->captureMessage($message, array(), array('level' => $level, 'extra' => $context));
             }
         });
+
+        // Register after filter
+        $this->app->after(function()
+        {
+            $raven = App::make('raven');
+            $raven->sendUnsentErrors();
+        });
     }
 
 }

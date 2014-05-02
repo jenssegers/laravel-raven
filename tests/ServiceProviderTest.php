@@ -84,7 +84,7 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
     {
         $exception = new Exception('Testing error handler');
 
-        $mock = Mockery::mock('Jenssegers\Raven\Raven');
+        $mock = Mockery::mock('Jenssegers\Raven\Raven[captureMessage,captureException]');
         $mock->shouldReceive('captureMessage')->once()->with('hello', array(), array('level' => 'info', 'extra' => array()));
         $mock->shouldReceive('captureMessage')->once()->with('oops', array(), array('level' => 'error', 'extra' => array('context')));
         $mock->shouldReceive('captureException')->once()->with($exception, array('level' => 'error', 'extra' => array()));
@@ -112,6 +112,15 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->app->instance('raven', $mock);
 
         Log::info('hello');
+    }
+
+    public function testAfterFilter()
+    {
+        $mock = Mockery::mock('Jenssegers\Raven\Raven[sendUnsentErrors]');
+        $mock->shouldReceive('sendUnsentErrors')->times(1);
+        $this->app->instance('raven', $mock);
+
+        Event::fire('router.after');
     }
 
 }
