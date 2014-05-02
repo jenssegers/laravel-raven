@@ -35,6 +35,18 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals(array('https://app.getsentry.com/api/store/'), $raven->servers);
     }
 
+    public function testCustomConfiguration()
+    {
+        Config::set('raven::name', 'foo');
+        Config::set('raven::site', 'bar');
+        Config::set('raven::tags', array('php_version' => phpversion()));
+
+        $raven = App::make('raven');
+        $this->assertEquals('foo', $raven->name);
+        $this->assertEquals('bar', $raven->site);
+        $this->assertEquals(array('php_version' => phpversion()), $raven->tags);
+    }
+
     public function testIsSingleton()
     {
         $raven1 = App::make('raven');
