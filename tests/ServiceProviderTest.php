@@ -47,13 +47,28 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals(array('php_version' => phpversion()), $raven->tags);
     }
 
-    public function testAdditionalTags()
+    public function testTagsAndSessionData()
     {
-        $raven = App::make('raven');
-        $data = $raven->get_default_data();
+        Session::set('foo', 'bar');
 
-        $this->assertEquals('testing', $data['tags']['environment']);
-        $this->assertEquals('127.0.0.1', $data['tags']['ip']);
+        $mock = Mockery::mock('Jenssegers\Raven\Raven[send]');
+        $mock->shouldReceive('send')->once()->with(array(
+            'sentry.interfaces.User'=>array('data'=>array('foo'=>'bar')),
+            'server_name'=>'server',
+            'project'=>1,
+            'site'=>'',
+            'logger'=>'php',
+            'tags'=>array('environment'=>'testing','ip'=>'127.0.0.1',),
+            'platform'=>'php',
+            'event_id'=>1,
+            'timestamp'=>'',
+            'level'=>'error',
+            'extra'=>array(),
+        ));
+        $this->app->instance('raven', $mock);
+
+        $raven = App::make('raven');
+        $raven->capture(array('event_id' => 1, 'timestamp' => '', 'server_name' => 'server'), array());
     }
 
     public function testIsSingleton()
