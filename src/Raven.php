@@ -9,16 +9,14 @@ use Raven_Client;
 class Raven extends Raven_Client {
 
     /**
-     * Integrate Laravel Session data.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     protected function get_user_data()
     {
         $user = $this->context->user ?: array();
         $session = Session::all();
 
-        // Add session data
+        // Add Laravel session data
         if (isset($user['data']))
         {
             $user['data'] = array_merge($session, $user['data']);
@@ -40,12 +38,11 @@ class Raven extends Raven_Client {
     }
 
     /**
-     * Add additional tags.
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function get_default_data()
     {
+        // Add additional tags
         $this->tags['environment'] = App::environment();
         $this->tags['ip'] = Request::getClientIp();
 
@@ -91,7 +88,7 @@ class Raven extends Raven_Client {
      * @param  array $data
      * @return void
      */
-    public function send_from_job($data)
+    public function sendFromJob($data)
     {
         return parent::send($data);
     }
