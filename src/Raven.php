@@ -91,9 +91,21 @@ class Raven extends Raven_Client {
      * @param  array $data
      * @return void
      */
-    public function sendFromJob($data)
+    public function send_from_job($data)
     {
         return parent::send($data);
+    }
+
+    /**
+     * Allow camel case methods.
+     *
+     * @param  string $method
+     * @param  array  $parameters
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        return call_user_func_array(array($this, snake_case($method)), $parameters);
     }
 
 }
