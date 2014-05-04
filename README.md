@@ -3,7 +3,7 @@ Laravel Raven
 
 [![Build Status](http://img.shields.io/travis/jenssegers/laravel-raven.svg)](https://travis-ci.org/jenssegers/laravel-raven) [![Coverage Status](http://img.shields.io/coveralls/jenssegers/laravel-raven.svg)](https://coveralls.io/r/jenssegers/laravel-raven)
 
-Sentry (Raven) error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Sentry messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application. Laravel session data will also be sent in the user context.
+Sentry (Raven) error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Sentry messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application. Laravel's session data will also be sent in the user context.
 
 ![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
 
