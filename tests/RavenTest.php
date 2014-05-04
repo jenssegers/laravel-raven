@@ -1,6 +1,6 @@
 <?php
 
-class ServiceProviderTest extends Orchestra\Testbench\TestCase {
+class RavenTest extends Orchestra\Testbench\TestCase {
 
     public function tearDown()
     {
@@ -160,6 +160,13 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
             'event_id'=>1,
             'server_name'=>'server'
         ));
+    }
+
+    public function testUserContext()
+    {
+
+
+
     }
 
 }
