@@ -15,14 +15,28 @@ class Raven extends Raven_Client {
      */
     protected function get_user_data()
     {
-        if (is_null($this->context->user) and $session = Session::all())
+        $user = $this->context->user ?: array();
+        $session = Session::all();
+
+        // Add session data
+        if (isset($user['data']))
         {
-            $this->context->user = array(
-                'data' => $session,
-            );
+            $user['data'] = array_merge($session, $user['data']);
+        }
+        else
+        {
+            $user['data'] = $session;
         }
 
-        return parent::get_user_data();
+        // Add session ID
+        if ( ! isset($user['id']))
+        {
+            $user['id'] = Session::getId();
+        }
+
+        return array(
+            'sentry.interfaces.User' => $user,
+        );
     }
 
     /**
@@ -45,6 +59,30 @@ class Raven extends Raven_Client {
     {
         // Push the job to the queue instead of sending it to Sentry directly.
         Queue::push('Jenssegers\Raven\Job', $data);
+    }
+
+    /**
+     * Parse the given context information.
+     *
+     * @param  array  $context
+     * @return array
+     */
+    public function parseContext($context = array())
+    {
+        // Set user context
+        if (isset($context['user']))
+        {
+            $this->user_context($context['user']);
+            unset($context['user']);
+        }
+
+        // Set extra context
+        if ( ! isset($context['extra']))
+        {
+            $context['extra'] = array_except($context, array('user', 'tags', 'level'));
+        }
+
+        return $context;
     }
 
     /**

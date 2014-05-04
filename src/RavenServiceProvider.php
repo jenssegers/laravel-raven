@@ -57,13 +57,17 @@ class RavenServiceProvider extends ServiceProvider {
         {
             $raven = App::make('raven');
 
+            // Prepare the context
+            $context = $raven->parseContext($context);
+            $context['level'] = $level;
+
             if ($message instanceof Exception)
             {
-                $raven->captureException($message, array('level' => $level, 'extra' => $context));
+                $raven->captureException($message, $context);
             }
             else
             {
-                $raven->captureMessage($message, array(), array('level' => $level, 'extra' => $context));
+                $raven->captureMessage($message, array(), $context);
             }
         });
 

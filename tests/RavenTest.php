@@ -55,7 +55,7 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
 
         $mock = Mockery::mock('Jenssegers\Raven\Raven[send]');
         $mock->shouldReceive('send')->once()->with(array(
-            'sentry.interfaces.User'=>array('data'=>array('foo'=>'bar')),
+            'sentry.interfaces.User'=>array('data'=>array('foo'=>'bar'),'id'=>Session::getId()),
             'server_name'=>'server',
             'project'=>1,
             'site'=>'',
@@ -86,12 +86,12 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
 
         $mock = Mockery::mock('Jenssegers\Raven\Raven[captureMessage,captureException]');
         $mock->shouldReceive('captureMessage')->once()->with('hello', array(), array('level' => 'info', 'extra' => array()));
-        $mock->shouldReceive('captureMessage')->once()->with('oops', array(), array('level' => 'error', 'extra' => array('context')));
+        $mock->shouldReceive('captureMessage')->once()->with('oops', array(), array('level' => 'error', 'extra' => array()));
         $mock->shouldReceive('captureException')->once()->with($exception, array('level' => 'error', 'extra' => array()));
         $this->app->instance('raven', $mock);
 
         Log::info('hello');
-        Log::error('oops', array('context'));
+        Log::error('oops');
         Log::error($exception);
     }
 
@@ -121,6 +121,45 @@ class ServiceProviderTest extends Orchestra\Testbench\TestCase {
         $this->app->instance('raven', $mock);
 
         Event::fire('router.after');
+    }
+
+    public function testPassContext()
+    {
+        Session::set('token', 'foobar');
+
+        $mock = Mockery::mock('Jenssegers\Raven\Raven[send]');
+        $mock->shouldReceive('send')->once()->with(array(
+            'sentry.interfaces.User'=>array('id'=>1,'email'=>'foo@bar.com','data'=>array('token'=>'foobar')),
+            'server_name'=>'server',
+            'project'=>1,
+            'site'=>'',
+            'logger'=>'php',
+            'tags'=>array('environment'=>'testing','ip'=>'127.0.0.1','tag'=>1),
+            'platform'=>'php',
+            'event_id'=>1,
+            'timestamp'=>'',
+            'level'=>'info',
+            'extra'=>array('foo'=>'bar'),
+            'message'=>'hello',
+            'sentry.interfaces.Message'=>array('message'=>'hello','params'=>array())
+        ));
+        $this->app->instance('raven', $mock);
+
+        Log::info('hello', array(
+            'user' => array(
+                'id' => 1,
+                'email' => 'foo@bar.com'
+            ),
+            'tags' => array(
+                'tag' => '1'
+            ),
+            'extra' => array(
+                'foo' => 'bar'
+            ),
+            'timestamp' => '',
+            'event_id'=>1,
+            'server_name'=>'server'
+        ));
     }
 
 }
