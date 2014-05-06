@@ -13,7 +13,7 @@ class Raven extends Raven_Client {
      */
     protected function get_user_data()
     {
-        $user = $this->context->user ?: array();
+        $user = isset($this->context->user) ? $this->context->user : array();
         $session = Session::all();
 
         // Add Laravel session data
