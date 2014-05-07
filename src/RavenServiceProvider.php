@@ -55,6 +55,7 @@ class RavenServiceProvider extends ServiceProvider {
         // Register log listener
         $this->app->log->listen(function($level, $message, $context)
         {
+            if (in_array($level, ['debug', 'info', 'notice'])) return;
             $raven = App::make('raven');
 
             // Prepare the context
