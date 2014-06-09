@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": ">=5.3",
-        "raven/raven": "*"
+        "illuminate/support": "4.*",
+        "raven/raven": "0.9.*"
     },
     "require-dev": {
         "orchestra/testbench": "2.1.*",
