@@ -29,13 +29,25 @@ Optional: register the Raven alias:
 Configuration
 -------------
 
+### Option 1: Services configuration file
+
+This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Raven:
+
+    'raven' => array(
+        'dsn' => 'your-raven-dsn',
+    ),
+
+### Option 2: The package configuration file
+
 Publish the included configuration file:
 
     php artisan config:publish jenssegers/raven
 
 And change your Sentry DSN:
 
-    'dsn' => '',
+    'dsn' => 'your-raven-dsn',
+
+### Attention!
 
 Because this library uses the queue system, make sure your `config/queue.php` file is configured correctly. If you do not wish to process the jobs in the background, you can set the queue driver to 'sync':
 
