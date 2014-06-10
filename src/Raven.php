@@ -5,8 +5,43 @@ use Session;
 use Queue;
 use Request;
 use Raven_Client;
+use Illuminate\Queue\QueueManager;
 
 class Raven extends Raven_Client {
+
+    /**
+     * The queue manager instance.
+     *
+     * @var \Illuminate\Queue\QueueManager
+     */
+    protected $queue;
+
+    /**
+     * Constructor.
+     */
+    public function __construct($config = array(), QueueManager $queue = null)
+    {
+        // Prepare constructor values.
+        $dsn = isset($config['dsn']) ? $config['dsn'] : '';
+        $config = array_except($config, array('dsn'));
+
+        parent::__construct($dsn, $config);
+
+        $this->setQueue($queue);
+    }
+
+    /**
+     * Set the queue manager instance.
+     *
+     * @param  \Illuminate\Queue\QueueManager  $queue
+     * @return \Jenssegers\Rollbar\Rollbar
+     */
+    public function setQueue(QueueManager $queue = null)
+    {
+        $this->queue = $queue;
+
+        return $this;
+    }
 
     /**
      * {@inheritdoc}
@@ -54,8 +89,18 @@ class Raven extends Raven_Client {
      */
     public function send($data)
     {
-        // Push the job to the queue instead of sending it to Sentry directly.
-        Queue::push('Jenssegers\Raven\Job', $data);
+        // If we have a QueueManager instance, we will push the payload as
+        // a job to the queue instead of sending it to Raven directly.
+        if ($this->queue)
+        {
+            $this->queue->push('Jenssegers\Raven\Job', $data);
+        }
+
+        // Otherwise we will just execute the original send method.
+        else
+        {
+            return parent::send($data);
+        }
     }
 
     /**

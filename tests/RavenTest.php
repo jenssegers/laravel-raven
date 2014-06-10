@@ -2,6 +2,14 @@
 
 class RavenTest extends Orchestra\Testbench\TestCase {
 
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->dsn = 'https://foo:bar@app.getsentry.com/12345';
+        Config::set('raven::dsn', $this->dsn);
+    }
+
     public function tearDown()
     {
         Mockery::close();
@@ -28,8 +36,6 @@ class RavenTest extends Orchestra\Testbench\TestCase {
 
     public function testPassConfiguration()
     {
-        Config::set('raven::dsn', 'https://foo:bar@app.getsentry.com/12345');
-
         $raven = App::make('raven');
         $this->assertEquals('12345', $raven->project);
         $this->assertEquals('foo', $raven->public_key);
@@ -47,6 +53,17 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals('foo', $raven->name);
         $this->assertEquals('bar', $raven->site);
         $this->assertEquals(array('php_version' => phpversion()), $raven->tags);
+    }
+
+    public function testServicesConfiguration()
+    {
+        $dsn = 'https://bar:foo@app.getsentry.com/4892345';
+        Config::set('services.raven.dsn', $dsn);
+
+        $raven = App::make('raven');
+        $this->assertEquals('4892345', $raven->project);
+        $this->assertEquals('bar', $raven->public_key);
+        $this->assertEquals('foo', $raven->secret_key);
     }
 
     public function testTagsAndSessionData()
@@ -95,32 +112,32 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         Log::error($exception);
     }
 
-    public function testQueueGetsPushed()
+    public function testFlush()
     {
-        $mock = Mockery::mock('Jenssegers\Raven\Raven[sendFromJob]');
-        $mock->shouldReceive('sendFromJob')->times(0);
+        $mock = Mockery::mock('Jenssegers\Raven\Raven');
+        $mock->shouldReceive('sendUnsentErrors')->once();
         $this->app->instance('raven', $mock);
 
-        Queue::shouldReceive('push')->once();
+        Route::enableFilters();
+        Event::fire('router.after');
+    }
+
+    public function testQueueGetsPushed()
+    {
+        $mock = Mockery::mock('Illuminate\Queue\QueueManager');
+        $mock->shouldReceive('push')->once();
+        $this->app->instance('queue', $mock);
+
         Log::info('hello');
     }
 
     public function testQueueGetsFired()
     {
-        $mock = Mockery::mock('Jenssegers\Raven\Raven[sendFromJob]');
-        $mock->shouldReceive('sendFromJob')->times(1);
-        $this->app->instance('raven', $mock);
+        $mock = Mockery::mock('Jenssegers\Raven\Job');
+        $mock->shouldReceive('fire')->once();
+        $this->app->instance('Jenssegers\Raven\Job', $mock);
 
         Log::info('hello');
-    }
-
-    public function testAfterFilter()
-    {
-        $mock = Mockery::mock('Jenssegers\Raven\Raven[sendUnsentErrors]');
-        $mock->shouldReceive('sendUnsentErrors')->times(1);
-        $this->app->instance('raven', $mock);
-
-        Event::fire('router.after');
     }
 
     public function testPassContext()
@@ -160,13 +177,6 @@ class RavenTest extends Orchestra\Testbench\TestCase {
             'event_id'=>1,
             'server_name'=>'server'
         ));
-    }
-
-    public function testUserContext()
-    {
-
-
-
     }
 
 }

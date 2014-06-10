@@ -38,10 +38,10 @@ class RavenServiceProvider extends ServiceProvider {
     {
         $this->app->bindShared('raven', function($app)
         {
-            // Get the Raven config
-            $config = array_except(Config::get('raven::config'), array('dsn'));
+            // Check the configuration files.
+            $config = Config::get('services.raven') ?: Config::get('raven::config');
 
-            return new Raven(Config::get('raven::dsn'), $config);
+            return new Raven($config, $app['queue']);
         });
     }
 
