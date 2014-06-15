@@ -71,8 +71,8 @@ class RavenServiceProvider extends ServiceProvider {
             }
         });
 
-        // Register after filter
-        $this->app->after(function()
+        // Register shutdown filter
+        $this->app->shutdown(function()
         {
             $raven = App::make('raven');
             $raven->sendUnsentErrors();
