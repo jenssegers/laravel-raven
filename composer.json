@@ -12,7 +12,7 @@
     "require": {
         "php": ">=5.3",
         "illuminate/support": "4.*",
-        "raven/raven": "0.9.*"
+        "raven/raven": "0.10.*"
     },
     "require-dev": {
         "orchestra/testbench": "2.2.*",
