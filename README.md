@@ -10,13 +10,9 @@ Sentry (Raven) error monitoring integration for Laravel projects. This library w
 Installation
 ------------
 
-Add the package to your `composer.json` and run `composer update`.
+Install using composer:
 
-    {
-        "require": {
-            "jenssegers/raven": "*"
-        }
-    }
+    composer require jenssegers/raven
 
 Add the service provider in `app/config/app.php`:
 
