@@ -36,10 +36,10 @@ class RavenServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app->bindShared('raven', function($app)
+        $this->app['raven'] = $this->app->share(function($app)
         {
-            // Check the configuration files.
-            $config = Config::get('services.raven') ?: Config::get('raven::config');
+            // Get configuration
+            $config = $app['config']->get('services.raven') ?: $app['config']->get('raven::config');
 
             return new Raven($config, $app['queue']);
         });
@@ -52,10 +52,12 @@ class RavenServiceProvider extends ServiceProvider {
      */
     protected function registerListeners()
     {
+        $app = $this->app;
+
         // Register log listener
-        $this->app->log->listen(function($level, $message, $context)
+        $app['log']->listen(function($level, $message, $context) use ($app)
         {
-            $raven = App::make('raven');
+            $raven = $app['raven'];
 
             // Prepare the context
             $context = $raven->parseContext($context);
@@ -71,12 +73,13 @@ class RavenServiceProvider extends ServiceProvider {
             }
         });
 
-        // Register shutdown filter
-        $this->app->shutdown(function()
+        // Register after filter
+        $app['router']->after(function ($request, $response) use ($app)
         {
-            $raven = App::make('raven');
-            $raven->sendUnsentErrors();
-        });
+                $raven = $app['raven'];
+                $raven->sendUnsentErrors();
+            }
+        );
     }
 
 }

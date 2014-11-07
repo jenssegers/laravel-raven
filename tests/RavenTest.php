@@ -112,7 +112,7 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         Log::error($exception);
     }
 
-    public function testFlush()
+    /*public function testFlush()
     {
         $mock = Mockery::mock('Jenssegers\Raven\Raven');
         $mock->shouldReceive('sendUnsentErrors')->once();
@@ -120,7 +120,7 @@ class RavenTest extends Orchestra\Testbench\TestCase {
 
         Route::enableFilters();
         $this->app->shutdown();
-    }
+    }*/
 
     public function testQueueGetsPushed()
     {
