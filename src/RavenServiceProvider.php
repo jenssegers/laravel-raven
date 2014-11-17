@@ -65,12 +65,14 @@ class RavenServiceProvider extends ServiceProvider {
 
             if ($message instanceof Exception)
             {
-                $raven->captureException($message, $context);
+                if (!in_array($level, ['debug', 'info', 'notice']))
+                    $raven->captureException($message, $context);
             }
-            else
-            {
-                $raven->captureMessage($message, array(), $context);
-            }
+//            else
+//            {
+//                if (!in_array($level, ['debug', 'info', 'notice']))
+//                    $raven->captureMessage($message, array(), $context);
+//            }
         });
 
         // Register after filter
