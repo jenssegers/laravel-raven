@@ -54,32 +54,39 @@ class RavenServiceProvider extends ServiceProvider {
     {
         $app = $this->app;
 
-        // Register log listener
-        $app['log']->listen(function($level, $message, $context) use ($app)
+        // Get configuration
+        $config = $app['config']->get('services.raven') ?: $app['config']->get('raven::config');
+
+        // If raven is enabled, register log listener and after filter
+        if ($config['enabled'] == true)
         {
-            $raven = $app['raven'];
-
-            // Prepare the context
-            $context = $raven->parseContext($context);
-            $context['level'] = $level;
-
-            if ($message instanceof Exception)
+            // Register log listener
+            $app['log']->listen(function($level, $message, $context) use ($app)
             {
-                $raven->captureException($message, $context);
-            }
-            else
-            {
-                $raven->captureMessage($message, array(), $context);
-            }
-        });
-
-        // Register after filter
-        $app['router']->after(function ($request, $response) use ($app)
-        {
                 $raven = $app['raven'];
-                $raven->sendUnsentErrors();
-            }
-        );
+
+                // Prepare the context
+                $context = $raven->parseContext($context);
+                $context['level'] = $level;
+
+                if ($message instanceof Exception)
+                {
+                    $raven->captureException($message, $context);
+                }
+                else
+                {
+                    $raven->captureMessage($message, array(), $context);
+                }
+            });
+
+            // Register after filter
+            $app['router']->after(function ($request, $response) use ($app)
+            {
+                    $raven = $app['raven'];
+                    $raven->sendUnsentErrors();
+                }
+            );
+        }
     }
 
 }

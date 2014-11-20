@@ -30,6 +30,7 @@ Configuration
 This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Raven:
 
     'raven' => array(
+        'enabled' => true,
         'dsn' => 'your-raven-dsn',
     ),
 
