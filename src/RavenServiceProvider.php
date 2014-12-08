@@ -57,8 +57,6 @@ class RavenServiceProvider extends ServiceProvider {
 
             $level = $app['config']->get('services.raven.level', 'debug');
 
-            var_dump($level);
-
             return new RavenLogHandler($client, $app, $level);
         });
     }
