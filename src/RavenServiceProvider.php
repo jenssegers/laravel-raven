@@ -1,9 +1,6 @@
 <?php namespace Jenssegers\Raven;
 
-use App;
-use Config;
-use Raven_Client;
-use Exception;
+use Raven_Client, Exception;
 use Illuminate\Support\ServiceProvider;
 
 class RavenServiceProvider extends ServiceProvider {
@@ -25,8 +22,13 @@ class RavenServiceProvider extends ServiceProvider {
         // Fix for PSR-4
         $this->package('jenssegers/raven', 'raven', realpath(__DIR__));
 
-        // Register listeners
-        $this->registerListeners();
+        $app = $this->app;
+
+        // Listen to log messages.
+        $app['log']->listen(function($level, $message, $context) use ($app)
+        {
+            $app['raven.handler']->log($level, $message, $context);
+        });
     }
 
     /**
@@ -36,50 +38,29 @@ class RavenServiceProvider extends ServiceProvider {
      */
     public function register()
     {
-        $this->app['raven'] = $this->app->share(function($app)
-        {
-            // Get configuration
-            $config = $app['config']->get('services.raven') ?: $app['config']->get('raven::config');
-
-            return new Raven($config, $app['queue']);
-        });
-    }
-
-    /**
-     * Register error and log listeners.
-     *
-     * @return void
-     */
-    protected function registerListeners()
-    {
         $app = $this->app;
 
-        // Register log listener
-        $app['log']->listen(function($level, $message, $context) use ($app)
+        $this->app['raven.client'] = $this->app->share(function($app)
         {
-            $raven = $app['raven'];
+            $config = $app['config']->get('services.raven');
 
-            // Prepare the context
-            $context = $raven->parseContext($context);
-            $context['level'] = $level;
+            $dsn = isset($config['dsn']) ? $config['dsn'] : '';
 
-            if ($message instanceof Exception)
-            {
-                $raven->captureException($message, $context);
-            }
-            else
-            {
-                $raven->captureMessage($message, array(), $context);
-            }
+            $config = array_except($config, array('dsn'));
+
+            return new Raven_Client($dsn, $config);
         });
 
-        // Register after filter
-        $app['router']->after(function ($request, $response) use ($app)
+        $this->app['raven.handler'] = $this->app->share(function($app)
         {
-                $raven = $app['raven'];
-                $raven->sendUnsentErrors();
-            }
-        );
+            $client = $app['raven.client'];
+
+            $level = $app['config']->get('services.raven.level', 'debug');
+
+            var_dump($level);
+
+            return new RavenLogHandler($client, $app, $level);
+        });
     }
 
 }

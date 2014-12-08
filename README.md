@@ -3,7 +3,7 @@ Laravel Raven
 
 [![Build Status](http://img.shields.io/travis/jenssegers/laravel-raven.svg)](https://travis-ci.org/jenssegers/laravel-raven) [![Coverage Status](http://img.shields.io/coveralls/jenssegers/laravel-raven.svg)](https://coveralls.io/r/jenssegers/laravel-raven)
 
-Sentry (Raven) error monitoring integration for Laravel projects. This library will add a listener to Laravel's logging component. All Sentry messages will be pushed onto Laravel's queue system, so that they can be processed in the background without slowing down the application. Laravel's session data will also be sent in the user context.
+Sentry (Raven) error monitoring integration for Laravel projects. This library adds a listener to Laravel's logging component. Laravel's session information will be sent in to Sentry's user context, as well as some other helpful tags such as 'environment', 'server', and 'ip'.
 
 ![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
 
@@ -25,29 +25,16 @@ Optional: register the Raven alias:
 Configuration
 -------------
 
-### Option 1: Services configuration file
-
 This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Raven:
 
     'raven' => array(
-        'dsn' => 'your-raven-dsn',
+        'dsn'   => 'your-raven-dsn',
+        'level' => 'error'
     ),
 
-### Option 2: The package configuration file
+The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all.
 
-Publish the included configuration file:
-
-    php artisan config:publish jenssegers/raven
-
-And change your Sentry DSN:
-
-    'dsn' => 'your-raven-dsn',
-
-### Attention!
-
-Because this library uses the queue system, make sure your `config/queue.php` file is configured correctly. If you do not wish to process the jobs in the background, you can set the queue driver to 'sync':
-
-    'default' => 'sync',
+For more information about the possible configuration variables, check https://github.com/getsentry/raven-php
 
 Usage
 -----
