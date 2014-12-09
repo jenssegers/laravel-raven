@@ -29,7 +29,7 @@ This package supports configuration through the services configuration file loca
 
     'raven' => array(
         'dsn'   => 'your-raven-dsn',
-        'level' => 'error'
+        'level' => 'debug'
     ),
 
 The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all.
