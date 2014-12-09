@@ -32,7 +32,7 @@ This package supports configuration through the services configuration file loca
         'level' => 'debug'
     ),
 
-The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all.
+The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.
 
 For more information about the possible configuration variables, check https://github.com/getsentry/raven-php
 
