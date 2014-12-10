@@ -22,33 +22,33 @@ class RavenTest extends Orchestra\Testbench\TestCase {
 
     public function testBinding()
     {
-        $raven = $this->app->make('raven.client');
-        $this->assertInstanceOf('Raven_Client', $raven);
+        $client = $this->app->make('raven.client');
+        $this->assertInstanceOf('Raven_Client', $client);
 
-        $raven = $this->app->make('raven.handler');
-        $this->assertInstanceOf('Jenssegers\Raven\RavenLogHandler', $raven);
+        $handler = $this->app->make('raven.handler');
+        $this->assertInstanceOf('Jenssegers\Raven\RavenLogHandler', $handler);
     }
 
     public function testIsSingleton()
     {
-        $raven1 = $this->app->make('raven.handler');
-        $raven2 = $this->app->make('raven.handler');
-        $this->assertEquals(spl_object_hash($raven1), spl_object_hash($raven2));
+        $handler1 = $this->app->make('raven.handler');
+        $handler2 = $this->app->make('raven.handler');
+        $this->assertEquals(spl_object_hash($handler1), spl_object_hash($handler2));
     }
 
     public function testFacade()
     {
-        $raven = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
-        $this->assertInstanceOf('Raven_Client', $raven);
+        $client = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
+        $this->assertInstanceOf('Raven_Client', $client);
     }
 
     public function testPassConfiguration()
     {
-        $raven = $this->app->make('raven.client');
-        $this->assertEquals('12345', $raven->project);
-        $this->assertEquals('foo', $raven->public_key);
-        $this->assertEquals('bar', $raven->secret_key);
-        $this->assertEquals(['https://app.getsentry.com/api/store/'], $raven->servers);
+        $client = $this->app->make('raven.client');
+        $this->assertEquals('12345', $client->project);
+        $this->assertEquals('foo', $client->public_key);
+        $this->assertEquals('bar', $client->secret_key);
+        $this->assertEquals(['https://app.getsentry.com/api/store/'], $client->servers);
     }
 
     public function testCustomConfiguration()
@@ -57,10 +57,10 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->app->config->set('services.raven.site', 'bar');
         $this->app->config->set('services.raven.tags', ['php_version' => phpversion()]);
 
-        $raven = $this->app->make('raven.client');
-        $this->assertEquals('foo', $raven->name);
-        $this->assertEquals('bar', $raven->site);
-        $this->assertEquals(['php_version' => phpversion()], $raven->tags);
+        $client = $this->app->make('raven.client');
+        $this->assertEquals('foo', $client->name);
+        $this->assertEquals('bar', $client->site);
+        $this->assertEquals(['php_version' => phpversion()], $client->tags);
     }
 
     public function testAutomaticContext()
@@ -130,7 +130,7 @@ class RavenTest extends Orchestra\Testbench\TestCase {
 
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->times(2);
-        $clientMock->shouldReceive('captureException')->times(1)->with(Mockery::type('Exception'), [
+        $clientMock->shouldReceive('captureException')->times(1)->with($exception, [
             'level' => 'error',
             'tags' => [
                 'environment' => 'testing',
