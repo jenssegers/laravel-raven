@@ -1,6 +1,7 @@
 <?php namespace Jenssegers\Raven;
 
-use Raven_Client, Exception;
+use Exception, InvalidArgumentException;
+use Raven_Client;
 use Illuminate\Support\ServiceProvider;
 
 class RavenServiceProvider extends ServiceProvider {
@@ -44,11 +45,14 @@ class RavenServiceProvider extends ServiceProvider {
         {
             $config = $app['config']->get('services.raven');
 
-            $dsn = isset($config['dsn']) ? $config['dsn'] : '';
+            if (empty($config['dsn']))
+            {
+                throw new InvalidArgumentException('Raven DSN not configured');
+            }
 
-            $config = array_except($config, array('dsn'));
+            $options = array_except($config, array('dsn'));
 
-            return new Raven_Client($dsn, $config);
+            return new Raven_Client($config['dsn'], $options);
         });
 
         $this->app['raven.handler'] = $this->app->share(function($app)

@@ -42,6 +42,14 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->assertInstanceOf('Raven_Client', $client);
     }
 
+    public function testNoConfiguration()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+
+        $this->app->config->set('services.raven.dsn', null);
+        $client = $this->app->make('raven.client');
+    }
+
     public function testPassConfiguration()
     {
         $client = $this->app->make('raven.client');
