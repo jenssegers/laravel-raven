@@ -48,24 +48,24 @@ To monitor exceptions, simply use the `Log` facade:
 
 Your other log messages will also be sent to Sentry:
 
-    Log::info('Here is some debug information');
+    Log::debug('Here is some debug information');
 
 ### Context informaton
 
 You can pass user information as context like this:
 
-    Log::info('Something went wrong', [
+    Log::error('Something went wrong', [
         'user' => ['name' => 'John Doe', 'email' => 'john@doe.com']
     ]);
 
 Or pass additional tags:
 
-    Log::info('Something went wrong', [
+    Log::info('Task completed', [
         'tags' => ['state' => 1234]
     ]);
 
 Or pass some extra information:
 
-    Log::info('Something went wrong', [
+    Log::warning('Something went wrong', [
         'download_size' => 3432425235
     ]);
