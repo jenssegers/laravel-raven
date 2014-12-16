@@ -20,9 +20,6 @@ class RavenServiceProvider extends ServiceProvider {
      */
     public function boot()
     {
-        // Fix for PSR-4
-        $this->package('jenssegers/raven', 'raven', realpath(__DIR__));
-
         $app = $this->app;
 
         // Listen to log messages.
@@ -50,18 +47,14 @@ class RavenServiceProvider extends ServiceProvider {
                 throw new InvalidArgumentException('Raven DSN not configured');
             }
 
-            $options = array_except($config, array('dsn'));
-
-            return new Raven_Client($config['dsn'], $options);
+            return new Raven_Client($config['dsn'], array_except($config, ['dsn']));
         });
 
         $this->app['raven.handler'] = $this->app->share(function($app)
         {
-            $client = $app['raven.client'];
-
             $level = $app['config']->get('services.raven.level', 'debug');
 
-            return new RavenLogHandler($client, $app, $level);
+            return new RavenLogHandler($app['raven.client'], $app, $level);
         });
     }
 

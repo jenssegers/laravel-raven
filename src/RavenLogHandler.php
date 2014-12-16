@@ -46,7 +46,7 @@ class RavenLogHandler {
 	* @param  string  $message
 	* @param  array   $context
 	*/
-	public function log($level, $message, array $context = array())
+	public function log($level, $message, array $context = [])
 	{
 		// Check if we want to log this message.
 		if ($this->parseLevel($level) < $this->level)
@@ -73,7 +73,7 @@ class RavenLogHandler {
 	 *
 	 * @param array $context
 	 */
-	protected function addContext(array $context = array())
+	protected function addContext(array $context = [])
 	{
 		// Add session data.
 		if ($session = $this->app->session->all())
