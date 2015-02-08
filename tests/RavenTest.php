@@ -13,9 +13,11 @@ class RavenTest extends Orchestra\Testbench\TestCase {
     public function tearDown()
     {
         Mockery::close();
+
+        parent::tearDown();
     }
 
-    protected function getPackageProviders()
+    protected function getPackageProviders($app)
     {
         return ['Jenssegers\Raven\RavenServiceProvider'];
     }
