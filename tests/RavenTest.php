@@ -58,7 +58,7 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals('12345', $client->project);
         $this->assertEquals('foo', $client->public_key);
         $this->assertEquals('bar', $client->secret_key);
-        $this->assertEquals(['https://app.getsentry.com/api/store/'], $client->servers);
+        $this->assertEquals(['https://app.getsentry.com/api/12345/store/'], $client->servers);
     }
 
     public function testCustomConfiguration()
