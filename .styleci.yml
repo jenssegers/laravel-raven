@@ -1,12 +1,15 @@
-preset: recommended
+preset: psr2
+
+enabled:
+  - duplicate_semicolon
+  - empty_return
+  - extra_empty_lines
+  - operators_spaces
+  - phpdoc_indent
+  - remove_leading_slash_use
+  - spaces_cast
+  - ternary_spaces
+  - unused_use
 
 disabled:
   - braces
-  - no_blank_lines_after_class_opening
-  - phpdoc_separation
-  - ordered_use
-  - phpdoc_order
-  - short_array_syntax
-  - single_blank_line_before_namespace
-  - single_quote
-  - unary_operators_spaces
