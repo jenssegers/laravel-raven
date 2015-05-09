@@ -8,29 +8,29 @@ use Illuminate\Foundation\Application;
 class RavenLogHandler {
 
     /**
-    * The raven client instance.
-    *
-    * @var Raven_Client
-    */
+     * The raven client instance.
+     *
+     * @var Raven_Client
+     */
     protected $raven;
 
     /**
-    * The Laravel application.
-    *
-    * @var \Illuminate\Foundation\Application
-    */
+     * The Laravel application.
+     *
+     * @var \Illuminate\Foundation\Application
+     */
     protected $app;
 
     /**
-    * The minimum log level at which messages are sent to Sentry.
-    *
-    * @var string
-    */
+     * The minimum log level at which messages are sent to Sentry.
+     *
+     * @var string
+     */
     protected $level;
 
     /**
-    * Constructor.
-    */
+     * Constructor.
+     */
     public function __construct(Raven_Client $raven, Application $app, $level = 'debug')
     {
         $this->raven = $raven;
@@ -41,12 +41,12 @@ class RavenLogHandler {
     }
 
     /**
-    * Log a message to Sentry.
-    *
-    * @param  mixed   $level
-    * @param  string  $message
-    * @param  array   $context
-    */
+     * Log a message to Sentry.
+     *
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
+     */
     public function log($level, $message, array $context = [])
     {
         // Check if we want to log this message.
@@ -103,7 +103,7 @@ class RavenLogHandler {
         // Automatic tags
         $tags = [
             'environment' => $this->app->environment(),
-            'server' => $this->app->request->server('HTTP_HOST')
+            'server'      => $this->app->request->server('HTTP_HOST'),
         ];
 
         // Add tags to context.
@@ -144,7 +144,7 @@ class RavenLogHandler {
     /**
      * Parse the string level into a Monolog constant.
      *
-     * @param  string  $level
+     * @param  string $level
      * @return int
      *
      * @throws \InvalidArgumentException

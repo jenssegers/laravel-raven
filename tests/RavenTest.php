@@ -80,17 +80,17 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'level' => 'info',
-            'user' => [
+            'user'  => [
                 'data' => ['foo' => 'bar'],
-                'id' => $this->app->session->getId()
+                'id'   => $this->app->session->getId(),
             ],
             'tags' => [
                 'environment' => 'testing',
-                'server' => 'localhost'
+                'server'      => 'localhost',
             ],
             'extra' => [
-                'ip' => '127.0.0.1'
-            ]
+                'ip' => '127.0.0.1',
+            ],
         ]);
 
         $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
@@ -108,19 +108,19 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'level' => 'info',
-            'user' => [
+            'user'  => [
                 'email' => 'john@doe.com',
-                'data' => ['foo' => 'bar'],
-                'id' => 1337
+                'data'  => ['foo' => 'bar'],
+                'id'    => 1337,
             ],
             'tags' => [
                 'environment' => 'testing',
-                'server' => 'localhost',
-                'one' => 'two'
+                'server'      => 'localhost',
+                'one'         => 'two',
             ],
             'extra' => [
-                'ip' => '127.0.0.1'
-            ]
+                'ip' => '127.0.0.1',
+            ],
         ]);
 
         $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
@@ -130,7 +130,7 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $handler = $this->app->make('raven.handler');
         $handler->log('info', 'Test log message', [
             'tags' => ['one' => 'two'],
-            'user' => ['id' => 1337, 'email' => 'john@doe.com']
+            'user' => ['id'  => 1337, 'email' => 'john@doe.com'],
         ]);
     }
 
@@ -139,15 +139,15 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'level' => 'info',
-            'tags' => [
+            'tags'  => [
                 'environment' => 'testing',
-                'server' => 'localhost',
+                'server'      => 'localhost',
             ],
             'extra' => [
-                'ip' => '192.168.0.1',
+                'ip'            => '192.168.0.1',
                 'download_size' => 3432425235,
-                'foo' => 'bar'
-            ]
+                'foo'           => 'bar',
+            ],
         ]);
 
         $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
@@ -157,10 +157,10 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $handler = $this->app->make('raven.handler');
         $handler->log('info', 'Test log message', [
             'download_size' => 3432425235,
-            'ip' => '192.168.0.1',
-            'extra' => [
-                'foo' => 'bar'
-            ]
+            'ip'            => '192.168.0.1',
+            'extra'         => [
+                'foo' => 'bar',
+            ],
         ]);
     }
 
@@ -172,13 +172,13 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $clientMock->shouldReceive('captureMessage')->times(2);
         $clientMock->shouldReceive('captureException')->times(1)->with($exception, [
             'level' => 'error',
-            'tags' => [
+            'tags'  => [
                 'environment' => 'testing',
-                'server' => 'localhost'
+                'server'      => 'localhost',
             ],
             'extra' => [
-                'ip' => '127.0.0.1'
-            ]
+                'ip' => '127.0.0.1',
+            ],
         ]);
 
         $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);

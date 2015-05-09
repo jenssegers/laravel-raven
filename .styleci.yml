@@ -1,4 +1,9 @@
-preset: psr2
+preset: recommended
 
 disabled:
   - braces
+  - no_blank_lines_after_class_opening
+  - phpdoc_separation
+  - ordered_use
+  - phpdoc_order
+  - short_array_syntax

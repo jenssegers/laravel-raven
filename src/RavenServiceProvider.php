@@ -1,6 +1,5 @@
 <?php namespace Jenssegers\Raven;
 
-use Exception;
 use InvalidArgumentException;
 use Raven_Client;
 use Raven_ErrorHandler;
