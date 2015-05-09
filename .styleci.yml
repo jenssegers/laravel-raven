@@ -13,4 +13,4 @@ enabled:
 
 disabled:
   - braces
-  - method_argument_space
+  - parenthesis
