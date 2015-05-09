@@ -1,7 +1,7 @@
 <?php namespace Jenssegers\Raven;
 
 use Exception, InvalidArgumentException;
-use Raven_Client;
+use Raven_Client, Raven_ErrorHandler;
 use Illuminate\Support\ServiceProvider;
 
 class RavenServiceProvider extends ServiceProvider {
@@ -55,6 +55,14 @@ class RavenServiceProvider extends ServiceProvider {
             $level = $app['config']->get('services.raven.level', 'debug');
 
             return new RavenLogHandler($app['raven.client'], $app, $level);
+        });
+
+        register_shutdown_function(function() use ($app)
+        {
+            if (isset($app['raven.client']))
+            {
+                (new Raven_ErrorHandler($app['raven.client']))->handleFatalError();
+            }
         });
     }
 
