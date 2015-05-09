@@ -1,7 +1,9 @@
 <?php namespace Jenssegers\Raven;
 
-use Exception, InvalidArgumentException;
-use Raven_Client, Raven_ErrorHandler;
+use Exception;
+use InvalidArgumentException;
+use Raven_Client;
+use Raven_ErrorHandler;
 use Illuminate\Support\ServiceProvider;
 
 class RavenServiceProvider extends ServiceProvider {
@@ -23,7 +25,7 @@ class RavenServiceProvider extends ServiceProvider {
         $app = $this->app;
 
         // Listen to log messages.
-        $app['log']->listen(function($level, $message, $context) use ($app)
+        $app['log']->listen(function ($level, $message, $context) use ($app)
         {
             $app['raven.handler']->log($level, $message, $context);
         });
@@ -38,7 +40,7 @@ class RavenServiceProvider extends ServiceProvider {
     {
         $app = $this->app;
 
-        $this->app['raven.client'] = $this->app->share(function($app)
+        $this->app['raven.client'] = $this->app->share(function ($app)
         {
             $config = $app['config']->get('services.raven');
 
@@ -56,14 +58,14 @@ class RavenServiceProvider extends ServiceProvider {
             return new Raven_Client($config['dsn'], array_except($config, ['dsn']));
         });
 
-        $this->app['raven.handler'] = $this->app->share(function($app)
+        $this->app['raven.handler'] = $this->app->share(function ($app)
         {
             $level = $app['config']->get('services.raven.level', 'debug');
 
             return new RavenLogHandler($app['raven.client'], $app, $level);
         });
 
-        register_shutdown_function(function() use ($app)
+        register_shutdown_function(function () use ($app)
         {
             if (isset($app['raven.client']))
             {
