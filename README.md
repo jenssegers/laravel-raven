@@ -12,25 +12,33 @@ Installation
 
 Install using composer:
 
-    composer require jenssegers/raven
+```
+composer require jenssegers/raven
+```
 
 Add the service provider in `app/config/app.php`:
 
-    'Jenssegers\Raven\RavenServiceProvider',
+```php
+'Jenssegers\Raven\RavenServiceProvider',
+```
 
 Optional: register the Raven alias:
 
-    'Raven'           => 'Jenssegers\Raven\Facades\Raven',
+```php
+'Raven'           => 'Jenssegers\Raven\Facades\Raven',
+```
 
 Configuration
 -------------
 
 This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Raven:
 
-    'raven' => [
-        'dsn'   => 'your-raven-dsn',
-        'level' => 'debug'
-    ],
+```php
+'raven' => [
+    'dsn'   => 'your-raven-dsn',
+    'level' => 'debug'
+],
+```
 
 The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.
 
@@ -43,40 +51,52 @@ Usage
 
 To automatically monitor exceptions, simply use the `Log` facade in your error handler in `app/Exceptions/Handler.php`:
 
-    public function report(Exception $e)
-    {
-        Log::error($e);
+```php
+public function report(Exception $e)
+{
+    Log::error($e);
 
-        return parent::report($e);
-    }
+    return parent::report($e);
+}
+```
 
 For Laravel 4 installations, this is located in `app/start/global.php`:
 
-    App::error(function(Exception $exception, $code)
-    {
-        Log::error($exception);
-    });
+```php
+App::error(function(Exception $exception, $code)
+{
+    Log::error($exception);
+});
+```
 
 Your other log messages will also be sent to Sentry:
 
-    Log::debug('Here is some debug information');
+```php
+Log::debug('Here is some debug information');
+```
 
 ### Context informaton
 
 You can pass user information as context like this:
 
-    Log::error('Something went wrong', [
-        'user' => ['name' => 'John Doe', 'email' => 'john@doe.com']
-    ]);
+```php
+Log::error('Something went wrong', [
+    'user' => ['name' => 'John Doe', 'email' => 'john@doe.com']
+]);
+```
 
 Or pass additional tags:
 
-    Log::info('Task completed', [
-        'tags' => ['state' => 1234]
-    ]);
+```php
+Log::info('Task completed', [
+    'tags' => ['state' => 1234]
+]);
+```
 
 Or pass some extra information:
 
-    Log::warning('Something went wrong', [
-        'download_size' => 3432425235
-    ]);
+```php
+Log::warning('Something went wrong', [
+    'download_size' => 3432425235
+]);
+```
