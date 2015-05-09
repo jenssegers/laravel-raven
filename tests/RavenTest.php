@@ -134,6 +134,29 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         ]);
     }
 
+    public function testEasyExtraData()
+    {
+        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
+            'level' => 'info',
+            'tags' => [
+                'environment' => 'testing',
+                'server' => 'localhost',
+            ],
+            'extra' => [
+                'ip' => '127.0.0.1',
+                'download_size' => 3432425235
+            ]
+        ]);
+
+        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
+        $handlerMock->shouldReceive('log')->passthru();
+        $this->app['raven.handler'] = $handlerMock;
+
+        $handler = $this->app->make('raven.handler');
+        $handler->log('info', 'Test log message', ['download_size' => 3432425235]);
+    }
+
     public function testLogListener()
     {
         $exception = new Exception('Testing error handler');

@@ -115,10 +115,13 @@ class RavenLogHandler {
 			$context['tags'] = $tags;
 		}
 
-		// Automatic extra
-		$extra = [
-			'ip' => $this->app->request->getClientIp()
-		];
+		// Everything that is not 'user', 'tags' or 'level' is automatically considered
+		// as additonal 'extra' context data.
+		$extra = array_except($context, ['user', 'tags', 'level']);
+		$context = array_only($context, ['user', 'tags', 'level']);
+
+		// Automatic extra data.
+		$extra['ip'] = $this->app->request->getClientIp();
 
 		// Add extra to context.
 		if (isset($context['extra']))

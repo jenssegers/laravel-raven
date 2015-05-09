@@ -34,7 +34,7 @@ This package supports configuration through the services configuration file loca
 
 The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.
 
-The Raven client is initiated with `curl_method` in asynchronous mode by default for best-effort asynchronous submissions. If you wish to change this behavior, then you can set `curl_method` to sync in your configuration array.
+The Raven client is initiated with `curl_method` in `async` mode by default for best-effort asynchronous submissions. If you wish to change this behavior, then you can set `curl_method` to `sync` in your configuration array.
 
 For more information about the possible configuration variables, check https://github.com/getsentry/raven-php
 
