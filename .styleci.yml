@@ -1,8 +1,4 @@
-preset: recommended
-
-enabled:
-  - strict
-  - strict_param
+preset: psr2
 
 disabled:
   - braces
