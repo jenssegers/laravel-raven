@@ -144,8 +144,9 @@ class RavenTest extends Orchestra\Testbench\TestCase {
                 'server' => 'localhost',
             ],
             'extra' => [
-                'ip' => '127.0.0.1',
-                'download_size' => 3432425235
+                'ip' => '192.168.0.1',
+                'download_size' => 3432425235,
+                'foo' => 'bar'
             ]
         ]);
 
@@ -154,7 +155,13 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->app['raven.handler'] = $handlerMock;
 
         $handler = $this->app->make('raven.handler');
-        $handler->log('info', 'Test log message', ['download_size' => 3432425235]);
+        $handler->log('info', 'Test log message', [
+            'download_size' => 3432425235,
+            'ip' => '192.168.0.1',
+            'extra' => [
+                'foo' => 'bar'
+            ]
+        ]);
     }
 
     public function testLogListener()
