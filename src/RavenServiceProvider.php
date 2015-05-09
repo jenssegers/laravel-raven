@@ -47,6 +47,12 @@ class RavenServiceProvider extends ServiceProvider {
                 throw new InvalidArgumentException('Raven DSN not configured');
             }
 
+            // Use async by default.
+            if (empty($config['curl_method']))
+            {
+                $config['curl_method'] = 'async';
+            }
+
             return new Raven_Client($config['dsn'], array_except($config, ['dsn']));
         });
 
