@@ -15,13 +15,23 @@ class RavenServiceProvider extends ServiceProvider {
     protected $defer = false;
 
     /**
+     * Indicates if the log listener is registered.
+     *
+     * @var bool
+     */
+    protected $listenerRegistered = false;
+
+    /**
      * Bootstrap the application events.
      *
      * @return void
      */
     public function boot()
     {
-        // Nothing.
+        if ( ! $this->listenerRegistered)
+        {
+            $this->registerListener();
+        }
     }
 
     /**
@@ -60,11 +70,10 @@ class RavenServiceProvider extends ServiceProvider {
             return new RavenLogHandler($app['raven.client'], $app, $level);
         });
 
-        // Listen to log messages.
-        $this->app['log']->listen(function ($level, $message, $context) use ($app)
+        if (isset($this->app['log']))
         {
-            $app['raven.handler']->log($level, $message, $context);
-        });
+            $this->registerListener();
+        }
 
         // Register the fatal error handler.
         register_shutdown_function(function () use ($app)
@@ -74,6 +83,23 @@ class RavenServiceProvider extends ServiceProvider {
                 (new Raven_ErrorHandler($app['raven.client']))->registerShutdownFunction();
             }
         });
+    }
+
+    /**
+     * Register the log listener.
+     *
+     * @return void
+     */
+    protected function registerListener()
+    {
+        $app = $this->app;
+
+        $this->app['log']->listen(function ($level, $message, $context) use ($app)
+        {
+            $app['raven.handler']->log($level, $message, $context);
+        });
+
+        $this->listenerRegistered = true;
     }
 
 }
