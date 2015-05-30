@@ -71,7 +71,7 @@ class RavenServiceProvider extends ServiceProvider {
         {
             if (isset($app['raven.client']))
             {
-                (new Raven_ErrorHandler($app['raven.client']))->handleFatalError();
+                (new Raven_ErrorHandler($app['raven.client']))->registerShutdownFunction();
             }
         });
     }
