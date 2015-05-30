@@ -41,9 +41,11 @@ class RavenServiceProvider extends ServiceProvider {
 
         $this->app['raven.client'] = $this->app->share(function ($app)
         {
-            $config = $app['config']->get('services.raven');
+            $config = $app['config']->get('services.raven', []);
 
-            if (empty($config['dsn']))
+            $dsn = env('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
+
+            if ( ! $dsn)
             {
                 throw new InvalidArgumentException('Raven DSN not configured');
             }
@@ -54,7 +56,7 @@ class RavenServiceProvider extends ServiceProvider {
                 $config['curl_method'] = 'async';
             }
 
-            return new Raven_Client($config['dsn'], array_except($config, ['dsn']));
+            return new Raven_Client($dsn, array_except($config, ['dsn']));
         });
 
         $this->app['raven.handler'] = $this->app->share(function ($app)
@@ -64,6 +66,7 @@ class RavenServiceProvider extends ServiceProvider {
             return new RavenLogHandler($app['raven.client'], $app, $level);
         });
 
+        // Register the fatal error handler.
         register_shutdown_function(function () use ($app)
         {
             if (isset($app['raven.client']))

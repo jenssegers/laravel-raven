@@ -73,6 +73,17 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->assertEquals(['php_version' => phpversion()], $client->tags);
     }
 
+    public function testEnvironmentConfiguration()
+    {
+        putenv('RAVEN_DSN=https://baz:qux@app.getsentry.com/54321');
+
+        $client = $this->app->make('raven.client');
+        $this->assertEquals('54321', $client->project);
+        $this->assertEquals('baz', $client->public_key);
+        $this->assertEquals('qux', $client->secret_key);
+        $this->assertEquals(['https://app.getsentry.com/api/54321/store/'], $client->servers);
+    }
+
     public function testAutomaticContext()
     {
         $this->app->session->set('foo', 'bar');
