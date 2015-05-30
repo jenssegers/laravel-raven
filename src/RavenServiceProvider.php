@@ -37,7 +37,7 @@ class RavenServiceProvider extends ServiceProvider {
         {
             $config = $app['config']->get('services.raven', []);
 
-            $dsn = env('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
+            $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
 
             if ( ! $dsn)
             {
