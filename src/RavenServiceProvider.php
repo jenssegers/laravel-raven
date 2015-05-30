@@ -21,13 +21,7 @@ class RavenServiceProvider extends ServiceProvider {
      */
     public function boot()
     {
-        $app = $this->app;
-
-        // Listen to log messages.
-        $app['log']->listen(function ($level, $message, $context) use ($app)
-        {
-            $app['raven.handler']->log($level, $message, $context);
-        });
+        // Nothing.
     }
 
     /**
@@ -64,6 +58,12 @@ class RavenServiceProvider extends ServiceProvider {
             $level = $app['config']->get('services.raven.level', 'debug');
 
             return new RavenLogHandler($app['raven.client'], $app, $level);
+        });
+
+        // Listen to log messages.
+        $this->app['log']->listen(function ($level, $message, $context) use ($app)
+        {
+            $app['raven.handler']->log($level, $message, $context);
         });
 
         // Register the fatal error handler.
