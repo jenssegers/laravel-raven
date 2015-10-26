@@ -9,6 +9,6 @@ class Raven extends Facade {
      *
      * @return string
      */
-    protected static function getFacadeAccessor() { return 'raven.client'; }
+    protected static function getFacadeAccessor() { return 'Raven_Client'; }
 
 }

@@ -1,9 +1,9 @@
 <?php namespace Jenssegers\Raven;
 
+use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Raven_Client;
 use Raven_ErrorHandler;
-use Illuminate\Support\ServiceProvider;
 
 class RavenServiceProvider extends ServiceProvider {
 
@@ -23,8 +23,6 @@ class RavenServiceProvider extends ServiceProvider {
 
     /**
      * Bootstrap the application events.
-     *
-     * @return void
      */
     public function boot()
     {
@@ -36,38 +34,34 @@ class RavenServiceProvider extends ServiceProvider {
 
     /**
      * Register the service provider.
-     *
-     * @return void
      */
     public function register()
     {
         $app = $this->app;
 
-        $this->app['raven.client'] = $this->app->share(function ($app)
+        $this->app['Raven_Client'] = $this->app->share(function ($app)
         {
-            $config = $app['config']->get('services.raven', []);
+            $defaults = [
+                'curl_method' => 'async',
+            ];
 
-            $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
+            $config = array_merge($defaults, $app['config']->get('services.raven', []));
 
-            if ( ! $dsn)
+            $dsn = env('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
+
+            if (! $dsn)
             {
                 throw new InvalidArgumentException('Raven DSN not configured');
-            }
-
-            // Use async by default.
-            if (empty($config['curl_method']))
-            {
-                $config['curl_method'] = 'async';
             }
 
             return new Raven_Client($dsn, array_except($config, ['dsn']));
         });
 
-        $this->app['raven.handler'] = $this->app->share(function ($app)
+        $this->app['Jenssegers\Raven\RavenLogHandler'] = $this->app->share(function ($app)
         {
-            $level = $app['config']->get('services.raven.level', 'debug');
+            $level = env('RAVEN_LEVEL') ?: $app['config']->get('services.raven.level', 'debug');
 
-            return new RavenLogHandler($app['raven.client'], $app, $level);
+            return new RavenLogHandler($app['Raven_Client'], $app, $level);
         });
 
         if (isset($this->app['log']))
@@ -78,17 +72,15 @@ class RavenServiceProvider extends ServiceProvider {
         // Register the fatal error handler.
         register_shutdown_function(function () use ($app)
         {
-            if (isset($app['raven.client']))
+            if (isset($app['Raven_Client']))
             {
-                (new Raven_ErrorHandler($app['raven.client']))->registerShutdownFunction();
+                (new Raven_ErrorHandler($app['Raven_Client']))->registerShutdownFunction();
             }
         });
     }
 
     /**
      * Register the log listener.
-     *
-     * @return void
      */
     protected function registerListener()
     {
@@ -96,7 +88,7 @@ class RavenServiceProvider extends ServiceProvider {
 
         $this->app['log']->listen(function ($level, $message, $context) use ($app)
         {
-            $app['raven.handler']->log($level, $message, $context);
+            $app['Jenssegers\Raven\RavenLogHandler']->log($level, $message, $context);
         });
 
         $this->listenerRegistered = true;

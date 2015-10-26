@@ -1,9 +1,9 @@
 <?php namespace Jenssegers\Raven;
 
 use Exception;
-use Raven_Client;
-use Monolog\Logger as Monolog;
 use Illuminate\Foundation\Application;
+use Monolog\Logger as Monolog;
+use Raven_Client;
 
 class RavenLogHandler {
 
