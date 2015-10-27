@@ -47,7 +47,7 @@ class RavenServiceProvider extends ServiceProvider {
 
             $config = array_merge($defaults, $app['config']->get('services.raven', []));
 
-            $dsn = env('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
+            $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
 
             if (! $dsn)
             {
@@ -59,7 +59,7 @@ class RavenServiceProvider extends ServiceProvider {
 
         $this->app['Jenssegers\Raven\RavenLogHandler'] = $this->app->share(function ($app)
         {
-            $level = env('RAVEN_LEVEL') ?: $app['config']->get('services.raven.level', 'debug');
+            $level = getenv('RAVEN_LEVEL') ?: $app['config']->get('services.raven.level', 'debug');
 
             return new RavenLogHandler($app['Raven_Client'], $app, $level);
         });
