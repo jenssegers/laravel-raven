@@ -2,22 +2,23 @@
     "name": "jenssegers/raven",
     "description": "Sentry (Raven) error monitoring integration for Laravel projects",
     "keywords": ["laravel", "sentry", "getsentry", "raven", "monitoring", "error", "logging"],
+    "homepage": "https://github.com/jenssegers/laravel-raven",
     "license": "MIT",
     "authors": [
         {
             "name": "Jens Segers",
-            "homepage": "http://jenssegers.be"
+            "homepage": "https://jenssegers.com"
         }
     ],
     "require": {
         "php": ">=5.4",
-        "illuminate/support": "4.*|5.*",
-        "raven/raven": "~0.11"
+        "illuminate/support": "^4.0|^5.0",
+        "raven/raven": "^0.11"
     },
     "require-dev": {
-        "orchestra/testbench": "~3.0",
-        "mockery/mockery": "*",
-        "satooshi/php-coveralls": "*"
+        "orchestra/testbench": "^3.0",
+        "mockery/mockery": "^0.9",
+        "satooshi/php-coveralls": "^0.6"
     },
     "autoload": {
         "psr-4": {
