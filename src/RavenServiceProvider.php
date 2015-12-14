@@ -38,22 +38,19 @@ class RavenServiceProvider extends ServiceProvider {
     public function register()
     {
         $app = $this->app;
+        $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
 
-        $this->app['Raven_Client'] = $this->app->share(function ($app)
+        if (!$dsn) {
+            return null;
+        }
+
+        $this->app['Raven_Client'] = $this->app->share(function ($app) use ($dsn)
         {
             $defaults = [
                 'curl_method' => 'async',
             ];
 
             $config = array_merge($defaults, $app['config']->get('services.raven', []));
-
-            $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
-
-            if (! $dsn)
-            {
-                throw new InvalidArgumentException('Raven DSN not configured');
-            }
-
             return new Raven_Client($dsn, array_except($config, ['dsn']));
         });
 
