@@ -1,7 +1,6 @@
 <?php namespace Jenssegers\Raven;
 
 use Illuminate\Support\ServiceProvider;
-use InvalidArgumentException;
 use Raven_Client;
 use Raven_ErrorHandler;
 
@@ -41,7 +40,7 @@ class RavenServiceProvider extends ServiceProvider {
         $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
 
         if (!$dsn) {
-            return null;
+            return;
         }
 
         $this->app['Raven_Client'] = $this->app->share(function ($app) use ($dsn)
