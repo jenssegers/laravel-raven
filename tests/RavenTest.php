@@ -1,19 +1,13 @@
 <?php
 
-class RavenTest extends Orchestra\Testbench\TestCase {
-
+class RavenTest extends Orchestra\Testbench\TestCase
+{
     public function setUp()
     {
-        parent::setUp();
-
         $this->dsn = 'https://foo:bar@app.getsentry.com/12345';
-        $this->app->config->set('services.raven.dsn', $this->dsn);
-    }
+        putenv('RAVEN_DSN=' . $this->dsn);
 
-    public function tearDown()
-    {
-        Mockery::close();
-        parent::tearDown();
+        parent::setUp();
     }
 
     protected function getPackageProviders($app)
@@ -41,14 +35,6 @@ class RavenTest extends Orchestra\Testbench\TestCase {
     {
         $client = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
         $this->assertInstanceOf('Raven_Client', $client);
-    }
-
-    public function testNoConfiguration()
-    {
-        $this->setExpectedException('InvalidArgumentException');
-
-        $this->app->config->set('services.raven.dsn', null);
-        $client = $this->app->make('Raven_Client');
     }
 
     public function testPassConfiguration()
@@ -225,5 +211,4 @@ class RavenTest extends Orchestra\Testbench\TestCase {
         $this->app->log->alert('hello');
         $this->app->log->emergency('hello');
     }
-
 }

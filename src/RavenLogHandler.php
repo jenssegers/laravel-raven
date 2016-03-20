@@ -2,11 +2,13 @@
 
 use Exception;
 use Illuminate\Foundation\Application;
+use InvalidArgumentException;
 use Monolog\Logger as Monolog;
+use Psr\Log\AbstractLogger;
 use Raven_Client;
 
-class RavenLogHandler {
-
+class RavenLogHandler extends AbstractLogger
+{
     /**
      * The raven client instance.
      *
@@ -27,6 +29,23 @@ class RavenLogHandler {
      * @var string
      */
     protected $level;
+
+    /**
+     * The Log levels.
+     *
+     * @var array
+     */
+    protected $levels = [
+        'debug'     => Monolog::DEBUG,
+        'info'      => Monolog::INFO,
+        'notice'    => Monolog::NOTICE,
+        'warning'   => Monolog::WARNING,
+        'error'     => Monolog::ERROR,
+        'critical'  => Monolog::CRITICAL,
+        'alert'     => Monolog::ALERT,
+        'emergency' => Monolog::EMERGENCY,
+        'none'      => 1000,
+    ];
 
     /**
      * Constructor.
@@ -50,8 +69,7 @@ class RavenLogHandler {
     public function log($level, $message, array $context = [])
     {
         // Check if we want to log this message.
-        if ($this->parseLevel($level) < $this->level)
-        {
+        if ($this->parseLevel($level) < $this->level) {
             return;
         }
 
@@ -59,12 +77,9 @@ class RavenLogHandler {
         $context['level'] = $level;
         $context = $this->addContext($context);
 
-        if ($message instanceof Exception)
-        {
+        if ($message instanceof Exception) {
             $this->raven->captureException($message, $context);
-        }
-        else
-        {
+        } else {
             $this->raven->captureMessage($message, [], $context);
         }
     }
@@ -77,25 +92,19 @@ class RavenLogHandler {
     protected function addContext(array $context = [])
     {
         // Add session data.
-        if ($session = $this->app->session->all())
-        {
-            if (empty($context['user']) or ! is_array($context['user']))
-            {
+        if ($session = $this->app->session->all()) {
+            if (empty($context['user']) or ! is_array($context['user'])) {
                 $context['user'] = [];
             }
 
-            if (isset($context['user']['data']))
-            {
+            if (isset($context['user']['data'])) {
                 $context['user']['data'] = array_merge($session, $context['user']['data']);
-            }
-            else
-            {
+            } else {
                 $context['user']['data'] = $session;
             }
 
             // User session id as user id if not set.
-            if (! isset($context['user']['id']))
-            {
+            if (! isset($context['user']['id'])) {
                 $context['user']['id'] = $this->app->session->getId();
             }
         }
@@ -107,12 +116,9 @@ class RavenLogHandler {
         ];
 
         // Add tags to context.
-        if (isset($context['tags']))
-        {
+        if (isset($context['tags'])) {
             $context['tags'] = array_merge($tags, $context['tags']);
-        }
-        else
-        {
+        } else {
             $context['tags'] = $tags;
         }
 
@@ -126,12 +132,9 @@ class RavenLogHandler {
         $extra = array_merge($extra, array_except($context, ['user', 'tags', 'level', 'extra']));
 
         // Add extra to context.
-        if (isset($context['extra']))
-        {
+        if (isset($context['extra'])) {
             $context['extra'] = array_merge($extra, $context['extra']);
-        }
-        else
-        {
+        } else {
             $context['extra'] = $extra;
         }
 
@@ -144,45 +147,17 @@ class RavenLogHandler {
     /**
      * Parse the string level into a Monolog constant.
      *
-     * @param  string $level
+     * @param  string  $level
      * @return int
      *
      * @throws \InvalidArgumentException
      */
     protected function parseLevel($level)
     {
-        switch ($level)
-        {
-            case 'debug':
-                return Monolog::DEBUG;
-
-            case 'info':
-                return Monolog::INFO;
-
-            case 'notice':
-                return Monolog::NOTICE;
-
-            case 'warning':
-                return Monolog::WARNING;
-
-            case 'error':
-                return Monolog::ERROR;
-
-            case 'critical':
-                return Monolog::CRITICAL;
-
-            case 'alert':
-                return Monolog::ALERT;
-
-            case 'emergency':
-                return Monolog::EMERGENCY;
-
-            case 'none':
-                return 1000;
-
-            default:
-                throw new \InvalidArgumentException("Invalid log level.");
+        if (isset($this->levels[$level])) {
+            return $this->levels[$level];
         }
-    }
 
+        throw new InvalidArgumentException('Invalid log level: ' . $level);
+    }
 }
