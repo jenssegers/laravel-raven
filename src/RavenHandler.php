@@ -6,7 +6,7 @@ use Monolog\Logger as Monolog;
 use Psr\Log\AbstractLogger;
 use Raven_Client;
 
-class RavenLogHandler extends AbstractLogger
+class RavenHandler extends AbstractLogger
 {
     /**
      * The raven client instance.

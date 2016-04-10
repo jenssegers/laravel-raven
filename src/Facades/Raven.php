@@ -12,6 +12,6 @@ class Raven extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return 'Jenssegers\Raven\RavenLogHandler';
+        return 'Jenssegers\Raven\RavenHandler';
     }
 }

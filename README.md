@@ -67,6 +67,21 @@ For logging messages or exceptions, you can any of these methods: `debug`, `noti
 Log::debug('Here is some debug information');
 ```
 
+### Alternative usage
+
+If you prefer dependency injection rather than calling the `Log` facade, you can typehint the `Jenssegers\Raven\RavenHandler` class in your controller methods:
+
+```php
+use Jenssegers\Raven\RavenHandler as Raven;
+
+...
+
+public function index(Request $request, Raven $raven)
+{
+	Raven::info('Request received!');
+}
+```
+
 ### Context informaton
 
 The included context builder will automatically collect information about the current logged in user and the session information. If can pass additional user context information like this:

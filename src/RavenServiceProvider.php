@@ -52,11 +52,11 @@ class RavenServiceProvider extends ServiceProvider
             return new Raven_Client($dsn, array_except($config, ['dsn']));
         });
 
-        $this->app['Jenssegers\Raven\RavenLogHandler'] = $this->app->share(function ($app) {
+        $this->app['Jenssegers\Raven\RavenHandler'] = $this->app->share(function ($app) {
             $level = getenv('RAVEN_LEVEL') ?: $app['config']->get('services.raven.level', 'debug');
             $builder = new ContextBuilder($app);
 
-            return new RavenLogHandler($app['Raven_Client'], $builder, $level);
+            return new RavenHandler($app['Raven_Client'], $builder, $level);
         });
 
         // Register log listeners for Laravel.
@@ -79,7 +79,7 @@ class RavenServiceProvider extends ServiceProvider
     {
         if (method_exists($this->app['log'], 'listen')) {
             $this->app['log']->listen(function ($level, $message, $context) {
-                $this->app['Jenssegers\Raven\RavenLogHandler']->log($level, $message, $context);
+                $this->app['Jenssegers\Raven\RavenHandler']->log($level, $message, $context);
             });
         }
 
