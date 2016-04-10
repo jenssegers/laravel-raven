@@ -42,13 +42,7 @@ class RavenServiceProvider extends ServiceProvider
         }
 
         $this->app['Raven_Client'] = $this->app->share(function ($app) {
-            // Default configuration.
-            $defaults = [
-                'curl_method' => 'async',
-            ];
-
-            $config = array_merge($defaults, $app['config']->get('services.raven', []));
-
+            $config = $app['config']->get('services.raven', []);
             $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
 
             if (! $dsn) {
