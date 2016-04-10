@@ -1,7 +1,6 @@
 <?php namespace Jenssegers\Raven;
 
 use Exception;
-use Illuminate\Container\Container;
 use InvalidArgumentException;
 use Monolog\Logger as Monolog;
 use Psr\Log\AbstractLogger;
@@ -50,11 +49,11 @@ class RavenLogHandler extends AbstractLogger
     /**
      * Constructor.
      */
-    public function __construct(Raven_Client $raven, Container $app, $level = 'debug')
+    public function __construct(Raven_Client $raven, ContextBuilder $context = null, $level = 'debug')
     {
         $this->raven = $raven;
 
-        $this->app = $app;
+        $this->context = $context;
 
         $this->level = $this->parseLevel($level ?: 'debug');
     }
@@ -75,75 +74,17 @@ class RavenLogHandler extends AbstractLogger
 
         // Put level in context.
         $context['level'] = $level;
-        $context = $this->addContext($context);
+
+        // Merge context from context builder.
+        if ($this->context) {
+            $context = $this->context->build($context);
+        }
 
         if ($message instanceof Exception) {
             $this->raven->captureException($message, $context);
         } else {
             $this->raven->captureMessage($message, [], $context);
         }
-    }
-
-    /**
-     * Add Laravel specific information to the context.
-     *
-     * @param array $context
-     */
-    protected function addContext(array $context = [])
-    {
-        // Add session data.
-        if (isset($this->app['session'])) {
-            $this->app['session']->all();
-
-            if (empty($context['user']) or ! is_array($context['user'])) {
-                $context['user'] = [];
-            }
-
-            if (isset($context['user']['data'])) {
-                $context['user']['data'] = array_merge($session, $context['user']['data']);
-            } else {
-                $context['user']['data'] = $session;
-            }
-
-            // User session id as user id if not set.
-            if (! isset($context['user']['id'])) {
-                $context['user']['id'] = $this->app->session->getId();
-            }
-        }
-
-        // Automatic tags
-        $tags = [
-            'environment' => $this->app->environment(),
-            'server'      => $this->app->request->server('HTTP_HOST'),
-        ];
-
-        // Add tags to context.
-        if (isset($context['tags'])) {
-            $context['tags'] = array_merge($tags, $context['tags']);
-        } else {
-            $context['tags'] = $tags;
-        }
-
-        // Automatic extra data.
-        $extra = [
-            'ip' => $this->app->request->getClientIp(),
-        ];
-
-        // Everything that is not 'user', 'tags' or 'level' is automatically considered
-        // as additonal 'extra' context data.
-        $extra = array_merge($extra, array_except($context, ['user', 'tags', 'level', 'extra']));
-
-        // Add extra to context.
-        if (isset($context['extra'])) {
-            $context['extra'] = array_merge($extra, $context['extra']);
-        } else {
-            $context['extra'] = $extra;
-        }
-
-        // Clean out other values from context.
-        $context = array_only($context, ['user', 'tags', 'level', 'extra']);
-
-        return $context;
     }
 
     /**

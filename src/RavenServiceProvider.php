@@ -60,8 +60,9 @@ class RavenServiceProvider extends ServiceProvider
 
         $this->app['Jenssegers\Raven\RavenLogHandler'] = $this->app->share(function ($app) {
             $level = getenv('RAVEN_LEVEL') ?: $app['config']->get('services.raven.level', 'debug');
+            $builder = new ContextBuilder($app);
 
-            return new RavenLogHandler($app['Raven_Client'], $app, $level);
+            return new RavenLogHandler($app['Raven_Client'], $builder, $level);
         });
 
         // Register log listeners for Laravel.

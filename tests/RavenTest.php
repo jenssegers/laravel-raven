@@ -1,5 +1,7 @@
 <?php
 
+use Jenssegers\Raven\ContextBuilder;
+
 class RavenTest extends Orchestra\Testbench\TestCase
 {
     public function setUp()
@@ -81,13 +83,14 @@ class RavenTest extends Orchestra\Testbench\TestCase
             'tags' => [
                 'environment' => 'testing',
                 'server'      => 'localhost',
+                'php_version' => phpversion(),
             ],
             'extra' => [
                 'ip' => '127.0.0.1',
             ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
+        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, new ContextBuilder($this->app)]);
         $handlerMock->shouldReceive('log')->passthru();
         $this->app['Jenssegers\Raven\RavenLogHandler'] = $handlerMock;
 
@@ -101,23 +104,24 @@ class RavenTest extends Orchestra\Testbench\TestCase
 
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
-            'level' => 'info',
+            'tags' => [
+                'environment' => 'testing',
+                'server'      => 'localhost',
+                'php_version' => phpversion(),
+                'one'         => 'two',
+            ],
             'user'  => [
                 'email' => 'john@doe.com',
                 'data'  => ['foo' => 'bar'],
                 'id'    => 1337,
             ],
-            'tags' => [
-                'environment' => 'testing',
-                'server'      => 'localhost',
-                'one'         => 'two',
-            ],
+            'level' => 'info',
             'extra' => [
                 'ip' => '127.0.0.1',
             ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
+        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, new ContextBuilder($this->app)]);
         $handlerMock->shouldReceive('log')->passthru();
         $this->app['Jenssegers\Raven\RavenLogHandler'] = $handlerMock;
 
@@ -132,19 +136,20 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
-            'level' => 'info',
-            'tags'  => [
-                'environment' => 'testing',
-                'server'      => 'localhost',
-            ],
             'extra' => [
                 'ip'            => '192.168.0.1',
                 'download_size' => 3432425235,
                 'foo'           => 'bar',
             ],
+            'level' => 'info',
+            'tags'  => [
+                'environment' => 'testing',
+                'server'      => 'localhost',
+                'php_version' => phpversion(),
+            ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
+        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, new ContextBuilder($this->app)]);
         $handlerMock->shouldReceive('log')->passthru();
         $this->app['Jenssegers\Raven\RavenLogHandler'] = $handlerMock;
 
@@ -155,6 +160,7 @@ class RavenTest extends Orchestra\Testbench\TestCase
             'extra'         => [
                 'foo' => 'bar',
             ],
+            'level' => 'info',
         ]);
     }
 
@@ -169,13 +175,15 @@ class RavenTest extends Orchestra\Testbench\TestCase
             'tags'  => [
                 'environment' => 'testing',
                 'server'      => 'localhost',
+                'php_version' => phpversion(),
             ],
             'extra' => [
                 'ip' => '127.0.0.1',
             ],
+            'level' => 'error',
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, $this->app]);
+        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, new ContextBuilder($this->app)]);
         $handlerMock->shouldReceive('log')->passthru();
         $this->app['Jenssegers\Raven\RavenLogHandler'] = $handlerMock;
 
