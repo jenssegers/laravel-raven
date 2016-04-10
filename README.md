@@ -3,7 +3,7 @@ Laravel Raven
 
 [![Build Status](http://img.shields.io/travis/jenssegers/laravel-raven.svg)](https://travis-ci.org/jenssegers/laravel-raven) [![Coverage Status](http://img.shields.io/coveralls/jenssegers/laravel-raven.svg)](https://coveralls.io/r/jenssegers/laravel-raven)
 
-Sentry (Raven) error monitoring integration for Laravel projects. This library adds a listener to Laravel's logging component. Laravel's session information will be sent in to Sentry's user context, as well as some other helpful tags such as 'environment', 'server', and 'ip'.
+Sentry (Raven) error monitoring integration for Laravel projects. This library adds a listener to Laravel's logging component. Laravel's auth and session information will be sent in to Sentry's user context, as well as some other helpful tags such as 'environment', 'server', 'php_version' and 'ip'.
 
 ![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
 
@@ -19,28 +19,26 @@ composer require jenssegers/raven
 Add the service provider in `app/config/app.php`:
 
 ```php
-'Jenssegers\Raven\RavenServiceProvider',
+Jenssegers\Raven\RavenServiceProvider::class,
 ```
 
 Optional: register the Raven alias:
 
 ```php
-'Raven'           => 'Jenssegers\Raven\Facades\Raven',
+'Raven'           => Jenssegers\Raven\Facades\Raven::class,
 ```
 
 Configuration
 -------------
 
-This package supports configuration through the services configuration file located in `app/config/services.php`. All configuration variables will be directly passed to Raven:
+This package supports configuration through environment variables and the services configuration file located in `app/config/services.php`:
 
 ```php
 'raven' => [
-    'dsn'   => 'your-raven-dsn',
-    'level' => 'debug'
+    'dsn'   => env('RAVEN_DSN'),
+    'level' => env('LOG_LEVEL'),
 ],
 ```
-
-**NOTE:** You can also set the DSN using the `RAVEN_DSN` environment variable.
 
 The level variable defines the minimum log level at which log messages are sent to Sentry. For development you could set this either to `debug` to send all log messages, or to `none` to sent no messages at all. For production you could set this to `error` so that all info and debug messages are ignored.
 
@@ -48,30 +46,22 @@ The Raven client is initiated with `curl_method` in `async` mode by default for 
 
 For more information about the possible configuration variables, check https://github.com/getsentry/raven-php
 
-Usage
------
+Usage in Laravel
+----------------
 
-To automatically monitor exceptions, simply use the `Log` facade in your error handler in `app/Exceptions/Handler.php`:
+In Laravel, the service provider will automatically hook into Laravel's logger and send all messages matching the log level to Sentry.
+
+If you want to send exceptions to Sentry, simply use the `Log` facade:
 
 ```php
-public function report(Exception $e)
-{
-    Log::error($e);
-
-    return parent::report($e);
+try {
+	something();
+} catch (\Exception $e) {
+	Log::error($e);
 }
 ```
 
-For Laravel 4 installations, this is located in `app/start/global.php`:
-
-```php
-App::error(function(Exception $exception, $code)
-{
-    Log::error($exception);
-});
-```
-
-Your other log messages will also be sent to Sentry:
+For logging messages or exceptions, you can any of these methods: `debug`, `notice`, `warning`, `error`, `critical`, `alert` or `emergency`.
 
 ```php
 Log::debug('Here is some debug information');
@@ -101,4 +91,32 @@ Or pass some extra information:
 Log::warning('Something went wrong', [
     'download_size' => 3432425235
 ]);
+```
+
+Usage in Lumen
+--------------
+
+Because Lumen uses a different way of handling logging, the service provider is unable to intercept actual exceptions. Instead you can use the included `Raven` facade. First add the following to your `bootstrap/app.php`:
+
+```php
+$app->register(Jenssegers\Raven\RavenServiceProvider::class);
+```
+
+Then add this to your exception handler in `app/Exceptions/Handler.php`:
+
+```php
+use Jenssegers\Raven\Facades\Raven;
+```
+
+And:
+
+```php
+public function report(Exception $e)
+{
+    if ($this->shouldReport($e)) {
+        Raven::error($e);
+    }
+
+    parent::report($e);
+}
 ```
