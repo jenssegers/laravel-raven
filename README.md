@@ -7,6 +7,8 @@ Sentry (Raven) error monitoring integration for Laravel projects. This library a
 
 ![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
 
+
+
 Installation
 ------------
 
