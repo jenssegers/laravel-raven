@@ -33,8 +33,8 @@ class RavenTest extends Orchestra\Testbench\TestCase
 
     public function testFacade()
     {
-        $client = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
-        $this->assertInstanceOf('Raven_Client', $client);
+        $handler = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
+        $this->assertInstanceOf('Jenssegers\Raven\RavenLogHandler', $handler);
     }
 
     public function testPassConfiguration()
