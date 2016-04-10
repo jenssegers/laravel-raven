@@ -41,8 +41,6 @@ class RavenServiceProvider extends ServiceProvider
             return;
         }
 
-        $app = $this->app;
-
         $this->app['Raven_Client'] = $this->app->share(function ($app) {
             // Default configuration.
             $defaults = [
@@ -67,14 +65,14 @@ class RavenServiceProvider extends ServiceProvider
         });
 
         // Register log listeners for Laravel.
-        if (isset($this->app['log']) && method_exists($this->app['log'], 'listen')) {
+        if (isset($this->app['log'])) {
             $this->registerListener();
         }
 
         // Register the fatal error handler.
-        register_shutdown_function(function () use ($app) {
-            if (isset($app['Raven_Client'])) {
-                (new Raven_ErrorHandler($app['Raven_Client']))->registerShutdownFunction();
+        register_shutdown_function(function () {
+            if (isset($this->app['Raven_Client'])) {
+                (new Raven_ErrorHandler($this->app['Raven_Client']))->registerShutdownFunction();
             }
         });
     }
@@ -84,11 +82,11 @@ class RavenServiceProvider extends ServiceProvider
      */
     protected function registerListener()
     {
-        $app = $this->app;
-
-        $this->app['log']->listen(function ($level, $message, $context) use ($app) {
-            $app['Jenssegers\Raven\RavenLogHandler']->log($level, $message, $context);
-        });
+        if (method_exists($this->app['log'], 'listen')) {
+            $this->app['log']->listen(function ($level, $message, $context) {
+                $this->app['Jenssegers\Raven\RavenLogHandler']->log($level, $message, $context);
+            });
+        }
 
         $this->listenerRegistered = true;
     }
