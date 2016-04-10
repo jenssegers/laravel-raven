@@ -1,7 +1,7 @@
 <?php namespace Jenssegers\Raven;
 
 use Exception;
-use Illuminate\Foundation\Application;
+use Illuminate\Container\Container;
 use InvalidArgumentException;
 use Monolog\Logger as Monolog;
 use Psr\Log\AbstractLogger;
@@ -19,7 +19,7 @@ class RavenLogHandler extends AbstractLogger
     /**
      * The Laravel application.
      *
-     * @var \Illuminate\Foundation\Application
+     * @var \Illuminate\Container\Container
      */
     protected $app;
 
@@ -50,7 +50,7 @@ class RavenLogHandler extends AbstractLogger
     /**
      * Constructor.
      */
-    public function __construct(Raven_Client $raven, Application $app, $level = 'debug')
+    public function __construct(Raven_Client $raven, Container $app, $level = 'debug')
     {
         $this->raven = $raven;
 
@@ -92,7 +92,9 @@ class RavenLogHandler extends AbstractLogger
     protected function addContext(array $context = [])
     {
         // Add session data.
-        if ($session = $this->app->session->all()) {
+        if (isset($this->app['session'])) {
+            $this->app['session']->all();
+
             if (empty($context['user']) or ! is_array($context['user'])) {
                 $context['user'] = [];
             }
