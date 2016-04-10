@@ -5,9 +5,7 @@ Laravel Raven
 
 Sentry (Raven) error monitoring integration for Laravel projects. This library adds a listener to Laravel's logging component. Laravel's auth and session information will be sent in to Sentry's user context, as well as some other helpful tags such as 'environment', 'server', 'php_version' and 'ip'.
 
-![rollbar](https://www.getsentry.com/_static/getsentry/images/hero.png)
-
-
+![rollbar](https://media.getsentry.com/_static/279c18667e633e98e9cb1dcf504bc60f/getsentry/dist/stream.gif)
 
 Installation
 ------------
