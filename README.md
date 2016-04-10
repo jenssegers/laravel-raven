@@ -31,7 +31,7 @@ Optional: register the Raven alias:
 Configuration
 -------------
 
-This package supports configuration through environment variables and the services configuration file located in `app/config/services.php`:
+This package supports configuration through environment variables and/or the services configuration file located in `app/config/services.php`:
 
 ```php
 'raven' => [
@@ -69,7 +69,7 @@ Log::debug('Here is some debug information');
 
 ### Context informaton
 
-You can pass user information as context like this:
+The included context builder will automatically collect information about the current logged in user and the session information. If can pass additional user context information like this:
 
 ```php
 Log::error('Something went wrong', [
