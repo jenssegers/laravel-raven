@@ -66,7 +66,8 @@ class RavenServiceProvider extends ServiceProvider
             return new RavenLogHandler($app['Raven_Client'], $app, $level);
         });
 
-        if (isset($this->app['log'])) {
+        // Register log listeners for Laravel.
+        if (isset($this->app['log']) && method_exists($this->app['log'], 'listen')) {
             $this->registerListener();
         }
 
