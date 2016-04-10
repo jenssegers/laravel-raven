@@ -132,6 +132,41 @@ class RavenTest extends Orchestra\Testbench\TestCase
         ]);
     }
 
+    public function testAuthData()
+    {
+        $user = new Illuminate\Foundation\Auth\User();
+        $user->id = 123;
+        $user->name = 'John Doe';
+        $user->username = 'johndoe';
+        $user->password = md5('foobar');
+
+        $this->app->auth->login($user);
+
+        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
+            'level' => 'info',
+            'user'  => [
+                'data' => ['login_web_59ba36addc2b2f9401580f014c7f58ea4e30989d' => $user->id],
+                'id'   => $user->id,
+            ],
+            'tags' => [
+                'environment' => 'testing',
+                'server'      => 'localhost',
+                'php_version' => phpversion(),
+            ],
+            'extra' => [
+                'ip' => '127.0.0.1',
+            ],
+        ]);
+
+        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenLogHandler', [$clientMock, new ContextBuilder($this->app)]);
+        $handlerMock->shouldReceive('log')->passthru();
+        $this->app['Jenssegers\Raven\RavenLogHandler'] = $handlerMock;
+
+        $handler = $this->app->make('Jenssegers\Raven\RavenLogHandler');
+        $handler->log('info', 'Test log message');
+    }
+
     public function testEasyExtraData()
     {
         $clientMock = Mockery::mock('Raven_Client');

@@ -24,21 +24,39 @@ class ContextBuilder
      */
     public function build(array $context)
     {
+        // Add auth data if available.
+        if (isset($this->app['auth']) && $user = $this->app['auth']->user()) {
+            if (empty($context['user']) or ! is_array($context['user'])) {
+                $context['user'] = [];
+            }
+
+            if (! isset($context['user']['id']) && method_exists($user, 'getAuthIdentifier')) {
+                $context['user']['id'] = $user->getAuthIdentifier();
+            }
+
+            if (! isset($context['user']['id']) && method_exists($user, 'getKey')) {
+                $context['user']['id'] = $user->getKey();
+            }
+
+            if (! isset($context['user']['id']) && isset($user->id)) {
+                $context['user']['id'] = $user->id;
+            }
+        }
+
         // Add session data if available.
         if (isset($this->app['session']) && $session = $this->app['session']->all()) {
             if (empty($context['user']) or ! is_array($context['user'])) {
                 $context['user'] = [];
             }
 
+            if (! isset($context['user']['id'])) {
+                $context['user']['id'] = $this->app->session->getId();
+            }
+
             if (isset($context['user']['data'])) {
                 $context['user']['data'] = array_merge($session, $context['user']['data']);
             } else {
                 $context['user']['data'] = $session;
-            }
-
-            // User session id as user id if not set.
-            if (! isset($context['user']['id'])) {
-                $context['user']['id'] = $this->app->session->getId();
             }
         }
 
