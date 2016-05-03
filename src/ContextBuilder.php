@@ -1,7 +1,5 @@
 <?php namespace Jenssegers\Raven;
 
-use Illuminate\Contracts\Container\Container;
-
 class ContextBuilder
 {
     /**
@@ -12,7 +10,7 @@ class ContextBuilder
     /**
      * @param Container $app
      */
-    public function __construct(Container $app)
+    public function __construct($app)
     {
         $this->app = $app;
     }
