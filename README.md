@@ -26,7 +26,7 @@ If you only want to enable Sentry reporting for certain environments you can con
 
 ```php
 if ($this->app->environment('production')) {
-    $this->app->register(Jenssegers\Raven\RavenServiceProvider::class::class);
+    $this->app->register(Jenssegers\Raven\RavenServiceProvider::class);
 }
 ```
 
