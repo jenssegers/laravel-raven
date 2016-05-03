@@ -36,7 +36,7 @@ class RavenServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Don't register rollbar if it is not configured.
+        // Don't register raven if it is not configured.
         if (! getenv('RAVEN_DSN') and ! $this->app['config']->get('services.raven')) {
             return;
         }
