@@ -22,6 +22,14 @@ Add the service provider in `app/config/app.php`:
 Jenssegers\Raven\RavenServiceProvider::class,
 ```
 
+If you only want to enable Sentry reporting for certain environments you can conditionally load the service provider in your `AppServiceProvider`:
+
+```php
+if ($this->app->environment('production')) {
+    $this->app->register(Jenssegers\Raven\RavenServiceProvider::class::class);
+}
+```
+
 Optional: register the Raven alias:
 
 ```php
