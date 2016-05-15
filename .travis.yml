@@ -13,8 +13,10 @@ env:
     - PREFER_LOWEST="--prefer-lowest"
     - PREFER_LOWEST=""
 
-before_script:
+before_install:
   - travis_retry composer self-update
+
+install:
   - travis_retry composer install --dev --no-interaction --prefer-source $PREFER_LOWEST
 
 script:
