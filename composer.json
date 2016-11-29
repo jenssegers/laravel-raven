@@ -13,7 +13,7 @@
     "require": {
         "php": ">=5.4",
         "illuminate/support": "^4.0|^5.0",
-        "sentry/sentry": "^1.0"
+        "sentry/sentry": "*"
     },
     "require-dev": {
         "orchestra/testbench": "^3.0",
