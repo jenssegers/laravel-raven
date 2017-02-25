@@ -71,7 +71,7 @@ class RavenTest extends Orchestra\Testbench\TestCase
 
     public function testAutomaticContext()
     {
-        $this->app->session->set('foo', 'bar');
+        $this->app->session->put('foo', 'bar');
 
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
@@ -100,7 +100,7 @@ class RavenTest extends Orchestra\Testbench\TestCase
 
     public function testMergedContext()
     {
-        $this->app->session->set('foo', 'bar');
+        $this->app->session->put('foo', 'bar');
 
         $clientMock = Mockery::mock('Raven_Client');
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [

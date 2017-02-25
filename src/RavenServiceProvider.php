@@ -1,5 +1,6 @@
 <?php namespace Jenssegers\Raven;
 
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Raven_Client;
@@ -41,7 +42,7 @@ class RavenServiceProvider extends ServiceProvider
             return;
         }
 
-        $this->app['Raven_Client'] = $this->app->share(function ($app) {
+        $this->app->singleton(Raven_Client::class, function ($app) {
             $config = $app['config']->get('services.raven', []);
             $dsn = getenv('RAVEN_DSN') ?: $app['config']->get('services.raven.dsn');
 
@@ -52,22 +53,17 @@ class RavenServiceProvider extends ServiceProvider
             return new Raven_Client($dsn, array_except($config, ['dsn']));
         });
 
-        $this->app['Jenssegers\Raven\RavenHandler'] = $this->app->share(function ($app) {
+        $this->app->singleton(RavenHandler::class, function ($app) {
             $level = getenv('RAVEN_LEVEL') ?: $app['config']->get('services.raven.level', 'debug');
             $builder = new ContextBuilder($app);
 
-            return new RavenHandler($app['Raven_Client'], $builder, $level);
+            return new RavenHandler($app[Raven_Client::class], $builder, $level);
         });
-
-        // Register log listeners for Laravel.
-        if (isset($this->app['log'])) {
-            $this->registerListener();
-        }
 
         // Register the fatal error handler.
         register_shutdown_function(function () {
-            if (isset($this->app['Raven_Client'])) {
-                (new Raven_ErrorHandler($this->app['Raven_Client']))->registerShutdownFunction();
+            if (isset($this->app[Raven_Client::class])) {
+                (new Raven_ErrorHandler($this->app[Raven_Client::class]))->registerShutdownFunction();
             }
         });
     }
@@ -78,8 +74,8 @@ class RavenServiceProvider extends ServiceProvider
     protected function registerListener()
     {
         if (method_exists($this->app['log'], 'listen')) {
-            $this->app['log']->listen(function ($level, $message, $context) {
-                $this->app['Jenssegers\Raven\RavenHandler']->log($level, $message, $context);
+            $this->app['log']->listen(function (MessageLogged $message) {
+                $this->app[RavenHandler::class]->log($message->level, $message->message, $message->context);
             });
         }
 
