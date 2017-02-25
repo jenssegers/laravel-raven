@@ -1,6 +1,5 @@
 <?php namespace Jenssegers\Raven;
 
-use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\ServiceProvider;
 use InvalidArgumentException;
 use Raven_Client;
@@ -74,7 +73,15 @@ class RavenServiceProvider extends ServiceProvider
     protected function registerListener()
     {
         if (method_exists($this->app['log'], 'listen')) {
-            $this->app['log']->listen(function (MessageLogged $message) {
+            $this->app['log']->listen(function () {
+                // Old Laravel way.
+                if (func_num_args() == 3) {
+                    list($level, $message, $context) = func_get_args();
+                    $this->app[RavenHandler::class]->log($level, $message, $context);
+                }
+
+                // New Laravel way.
+                $message = func_get_arg(0);
                 $this->app[RavenHandler::class]->log($message->level, $message->message, $message->context);
             });
         }
