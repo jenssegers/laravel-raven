@@ -1,47 +1,54 @@
 <?php
 
+use Illuminate\Foundation\Auth\User;
 use Jenssegers\Raven\ContextBuilder;
+use Jenssegers\Raven\RavenHandler;
 
 class RavenTest extends Orchestra\Testbench\TestCase
 {
     public function setUp()
     {
         $this->dsn = 'https://foo:bar@app.getsentry.com/12345';
-        putenv('RAVEN_DSN=' . $this->dsn);
-
+        putenv('RAVEN_DSN='.$this->dsn);
         parent::setUp();
+    }
+
+    public function tearDown()
+    {
+        Mockery::close();
+        parent::tearDown();
     }
 
     protected function getPackageProviders($app)
     {
-        return ['Jenssegers\Raven\RavenServiceProvider'];
+        return [Jenssegers\Raven\RavenServiceProvider::class];
     }
 
     public function testBinding()
     {
-        $client = $this->app->make('Raven_Client');
-        $this->assertInstanceOf('Raven_Client', $client);
+        $client = $this->app->make(Raven_Client::class);
+        $this->assertInstanceOf(Raven_Client::class, $client);
 
-        $handler = $this->app->make('Jenssegers\Raven\RavenHandler');
-        $this->assertInstanceOf('Jenssegers\Raven\RavenHandler', $handler);
+        $handler = $this->app->make(RavenHandler::class);
+        $this->assertInstanceOf(RavenHandler::class, $handler);
     }
 
     public function testIsSingleton()
     {
-        $handler1 = $this->app->make('Jenssegers\Raven\RavenHandler');
-        $handler2 = $this->app->make('Jenssegers\Raven\RavenHandler');
+        $handler1 = $this->app->make(RavenHandler::class);
+        $handler2 = $this->app->make(RavenHandler::class);
         $this->assertEquals(spl_object_hash($handler1), spl_object_hash($handler2));
     }
 
     public function testFacade()
     {
         $handler = Jenssegers\Raven\Facades\Raven::getFacadeRoot();
-        $this->assertInstanceOf('Jenssegers\Raven\RavenHandler', $handler);
+        $this->assertInstanceOf(RavenHandler::class, $handler);
     }
 
     public function testPassConfiguration()
     {
-        $client = $this->app->make('Raven_Client');
+        $client = $this->app->make(Raven_Client::class);
         $this->assertEquals('12345', $client->project);
         $this->assertEquals('foo', $client->public_key);
         $this->assertEquals('bar', $client->secret_key);
@@ -53,7 +60,7 @@ class RavenTest extends Orchestra\Testbench\TestCase
         $this->app->config->set('services.raven.site', 'bar');
         $this->app->config->set('services.raven.tags', ['php_version' => phpversion()]);
 
-        $client = $this->app->make('Raven_Client');
+        $client = $this->app->make(Raven_Client::class);
         $this->assertEquals('foo', $client->name);
         $this->assertEquals('bar', $client->site);
         $this->assertEquals(['php_version' => phpversion()], $client->tags);
@@ -63,7 +70,7 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         putenv('RAVEN_DSN=https://baz:qux@app.getsentry.com/54321');
 
-        $client = $this->app->make('Raven_Client');
+        $client = $this->app->make(Raven_Client::class);
         $this->assertEquals('54321', $client->project);
         $this->assertEquals('baz', $client->public_key);
         $this->assertEquals('qux', $client->secret_key);
@@ -73,16 +80,16 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         $this->app->session->put('foo', 'bar');
 
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'level' => 'info',
-            'user'  => [
+            'user' => [
                 'data' => ['foo' => 'bar'],
-                'id'   => $this->app->session->getId(),
+                'id' => $this->app->session->getId(),
             ],
             'tags' => [
                 'environment' => 'testing',
-                'server'      => 'localhost',
+                'server' => 'localhost',
                 'php_version' => phpversion(),
             ],
             'extra' => [
@@ -90,11 +97,14 @@ class RavenTest extends Orchestra\Testbench\TestCase
             ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenHandler', [$clientMock, new ContextBuilder($this->app)]);
+        $handlerMock = Mockery::mock(RavenHandler::class, [
+            $clientMock,
+            new ContextBuilder($this->app),
+        ]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Raven\RavenHandler'] = $handlerMock;
+        $this->app[RavenHandler::class] = $handlerMock;
 
-        $handler = $this->app->make('Jenssegers\Raven\RavenHandler');
+        $handler = $this->app->make(RavenHandler::class);
         $handler->log('info', 'Test log message');
     }
 
@@ -102,18 +112,18 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         $this->app->session->put('foo', 'bar');
 
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'tags' => [
                 'environment' => 'testing',
-                'server'      => 'localhost',
+                'server' => 'localhost',
                 'php_version' => phpversion(),
-                'one'         => 'two',
+                'one' => 'two',
             ],
-            'user'  => [
+            'user' => [
                 'email' => 'john@doe.com',
-                'data'  => ['foo' => 'bar'],
-                'id'    => 1337,
+                'data' => ['foo' => 'bar'],
+                'id' => 1337,
             ],
             'level' => 'info',
             'extra' => [
@@ -121,20 +131,27 @@ class RavenTest extends Orchestra\Testbench\TestCase
             ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenHandler', [$clientMock, new ContextBuilder($this->app)]);
+        $handlerMock = Mockery::mock(RavenHandler::class, [
+            $clientMock,
+            new ContextBuilder($this->app),
+        ]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Raven\RavenHandler'] = $handlerMock;
+        $this->app[RavenHandler::class] = $handlerMock;
 
-        $handler = $this->app->make('Jenssegers\Raven\RavenHandler');
+        $handler = $this->app->make(RavenHandler::class);
         $handler->log('info', 'Test log message', [
             'tags' => ['one' => 'two'],
-            'user' => ['id'  => 1337, 'email' => 'john@doe.com'],
+            'user' => ['id' => 1337, 'email' => 'john@doe.com'],
         ]);
     }
 
     public function testAuthData()
     {
-        $user = new Illuminate\Foundation\Auth\User();
+        if (! class_exists(User::class)) {
+            return;
+        }
+
+        $user = new User();
         $user->id = 123;
         $user->name = 'John Doe';
         $user->username = 'johndoe';
@@ -142,16 +159,16 @@ class RavenTest extends Orchestra\Testbench\TestCase
 
         $this->app->auth->login($user);
 
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'level' => 'info',
-            'user'  => [
+            'user' => [
                 'data' => ['login_web_59ba36addc2b2f9401580f014c7f58ea4e30989d' => $user->id],
-                'id'   => $user->id,
+                'id' => $user->id,
             ],
             'tags' => [
                 'environment' => 'testing',
-                'server'      => 'localhost',
+                'server' => 'localhost',
                 'php_version' => phpversion(),
             ],
             'extra' => [
@@ -159,40 +176,46 @@ class RavenTest extends Orchestra\Testbench\TestCase
             ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenHandler', [$clientMock, new ContextBuilder($this->app)]);
+        $handlerMock = Mockery::mock(RavenHandler::class, [
+            $clientMock,
+            new ContextBuilder($this->app),
+        ]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Raven\RavenHandler'] = $handlerMock;
+        $this->app[RavenHandler::class] = $handlerMock;
 
-        $handler = $this->app->make('Jenssegers\Raven\RavenHandler');
+        $handler = $this->app->make(RavenHandler::class);
         $handler->log('info', 'Test log message');
     }
 
     public function testEasyExtraData()
     {
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->once()->with('Test log message', [], [
             'extra' => [
-                'ip'            => '192.168.0.1',
+                'ip' => '192.168.0.1',
                 'download_size' => 3432425235,
-                'foo'           => 'bar',
+                'foo' => 'bar',
             ],
             'level' => 'info',
-            'tags'  => [
+            'tags' => [
                 'environment' => 'testing',
-                'server'      => 'localhost',
+                'server' => 'localhost',
                 'php_version' => phpversion(),
             ],
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenHandler', [$clientMock, new ContextBuilder($this->app)]);
+        $handlerMock = Mockery::mock(RavenHandler::class, [
+            $clientMock,
+            new ContextBuilder($this->app),
+        ]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Raven\RavenHandler'] = $handlerMock;
+        $this->app[RavenHandler::class] = $handlerMock;
 
-        $handler = $this->app->make('Jenssegers\Raven\RavenHandler');
+        $handler = $this->app->make(RavenHandler::class);
         $handler->log('info', 'Test log message', [
             'download_size' => 3432425235,
-            'ip'            => '192.168.0.1',
-            'extra'         => [
+            'ip' => '192.168.0.1',
+            'extra' => [
                 'foo' => 'bar',
             ],
             'level' => 'info',
@@ -203,13 +226,13 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         $exception = new Exception('Testing error handler');
 
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->times(2);
         $clientMock->shouldReceive('captureException')->times(1)->with($exception, [
             'level' => 'error',
-            'tags'  => [
+            'tags' => [
                 'environment' => 'testing',
-                'server'      => 'localhost',
+                'server' => 'localhost',
                 'php_version' => phpversion(),
             ],
             'extra' => [
@@ -218,9 +241,12 @@ class RavenTest extends Orchestra\Testbench\TestCase
             'level' => 'error',
         ]);
 
-        $handlerMock = Mockery::mock('Jenssegers\Raven\RavenHandler', [$clientMock, new ContextBuilder($this->app)]);
+        $handlerMock = Mockery::mock(RavenHandler::class, [
+            $clientMock,
+            new ContextBuilder($this->app),
+        ]);
         $handlerMock->shouldReceive('log')->passthru();
-        $this->app['Jenssegers\Raven\RavenHandler'] = $handlerMock;
+        $this->app[RavenHandler::class] = $handlerMock;
 
         $this->app->log->info('hello');
         $this->app->log->error('oops');
@@ -231,9 +257,9 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         $this->app->config->set('services.raven.level', 'error');
 
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->times(0);
-        $this->app['Raven_Client'] = $clientMock;
+        $this->app[Raven_Client::class] = $clientMock;
 
         $this->app->log->info('hello');
         $this->app->log->debug('hello');
@@ -245,9 +271,9 @@ class RavenTest extends Orchestra\Testbench\TestCase
     {
         $this->app->config->set('services.raven.level', 'error');
 
-        $clientMock = Mockery::mock('Raven_Client');
+        $clientMock = Mockery::mock(Raven_Client::class);
         $clientMock->shouldReceive('captureMessage')->times(4);
-        $this->app['Raven_Client'] = $clientMock;
+        $this->app[Raven_Client::class] = $clientMock;
 
         $this->app->log->error('hello');
         $this->app->log->critical('hello');
