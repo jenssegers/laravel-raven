@@ -78,6 +78,7 @@ class RavenServiceProvider extends ServiceProvider
                 if (func_num_args() > 1) {
                     list($level, $message, $context) = func_get_args();
                     $this->app[RavenHandler::class]->log($level, $message, $context);
+                    return;
                 }
 
                 // New Laravel way.
